@@ -1,0 +1,12 @@
+security:
+    password_hashers:
+        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: auto
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+        main:
+            stateless: true
+    access_control:
+        - { path: ^/api/v1/health$, roles: PUBLIC_ACCESS }
+

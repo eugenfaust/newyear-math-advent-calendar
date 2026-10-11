@@ -1,0 +1,14 @@
+parameters:
+    app.timezone: '%env(APP_TIMEZONE)%'
+    uploads_dir: '%env(UPLOADS_DIR)%'
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/Kernel.php'
+

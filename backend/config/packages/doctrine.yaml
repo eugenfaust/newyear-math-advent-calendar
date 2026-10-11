@@ -1,0 +1,12 @@
+doctrine:
+    dbal:
+        url: '%env(resolve:DATABASE_URL)%'
+    orm:
+        mappings:
+            App:
+                is_bundle: false
+                type: attribute
+                dir: '%kernel.project_dir%/src'
+                prefix: 'App'
+                alias: App
+
