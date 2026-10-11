@@ -11,7 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity]
 #[ORM\Table(name: 'user_ornament')]
 #[ORM\UniqueConstraint(name: 'uniq_user_ornament_day', columns: ['day_progress_id'])]
-#[ORM\UniqueConstraint(name: 'uniq_user_ornament_calendar_slot', columns: ['calendar_id', 'tree_slot'])]
+#[ORM\UniqueConstraint(name: 'uniq_user_ornament_calendar_slot', columns: ['calendar_id', 'tree_slot'], options: ['where' => '(tree_slot IS NOT NULL)'])]
 #[ORM\Index(name: 'idx_user_ornament_calendar', columns: ['calendar_id'])]
 #[ORM\Index(name: 'idx_user_ornament_ornament', columns: ['ornament_id'])]
 class UserOrnament
@@ -65,4 +65,12 @@ class UserOrnament
     public function getReceivedAt(): \DateTimeImmutable { return $this->receivedAt; }
     public function getPlacedAt(): ?\DateTimeImmutable { return $this->placedAt; }
     public function getUpdatedAt(): \DateTimeImmutable { return $this->updatedAt; }
+
+    public function place(int $slot, \DateTimeImmutable $now): void
+    {
+        if ($slot < 1 || $slot > 31) throw new \InvalidArgumentException('Slot must be between 1 and 31.');
+        if ($this->treeSlot === $slot) return;
+        $this->treeSlot = $slot;
+        $this->placedAt = $this->updatedAt = $now;
+    }
 }

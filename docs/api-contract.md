@@ -21,6 +21,14 @@
 
 `POST /api/v1/calendar/days/{day}/complete` принимает JSON `{}` и необязательный `?year=YYYY` по тому же правилу. Доступный день завершает задание и выдаёт одну активную игрушку в общей транзакции. Ответ `200`: `{completed: true, completedAt: "2026-12-01T12:00:00Z", reward: {uuid, name, imageUrl}}`, где `reward.uuid` — UUID полученной пользователем игрушки (`UserOrnament`). Повторный вызов возвращает те же `completedAt` и награду, даже если исходная игрушка затем деактивирована. Неполученные пользователем активные варианты выбираются случайно первыми; после их исчерпания допустимы повторы. Ошибки: `404 ADVENT_CALENDAR_NOT_FOUND` (включая чужой календарь), `404 ADVENT_DAY_NOT_FOUND`, `403 ADVENT_DAY_LOCKED`, `409 NO_ACTIVE_ORNAMENTS` без изменения прогресса, `422 VALIDATION_ERROR` для дня/года. Frontend использует same-origin `POST /api/calendar/days/{day}/complete` с JSON `{}`; route handler проверяет сессию, `Origin` и `Content-Type`. Все ответы имеют `Cache-Control: no-store`.
 
+## Ёлка пользователя
+
+`GET /api/v1/tree` выбирает календарь текущего года в `APP_TIMEZONE`; необязательный `?year=YYYY` позволяет читать историю по тому же правилу, что и календарь. Ответ `200`: `{calendarUuid, year, completedDays, totalDays: 31, completed, ornaments}`. `completed` равен `true` после выполнения всех 31 дней, независимо от размещения игрушек. `ornaments` отсортированы по `receivedAt`, затем UUID; каждая запись: `{uuid, name, imageUrl, treeSlot, receivedAt, placedAt, updatedAt}`. `treeSlot` равен `null` или целому от 1 до 31. Даты — UTC; `placedAt` равен `null` до первого размещения и обновляется при перемещении. Деактивация игрушки в каталоге не скрывает уже выданную игрушку. Отсутствие календаря — `404 ADVENT_CALENDAR_NOT_FOUND`.
+
+`POST /api/v1/tree/ornaments/{uuid}/place` принимает JSON `{slot: 1}` с целым номером от 1 до 31 и необязательный `?year=YYYY`. `uuid` обозначает выданную пользователю игрушку (`UserOrnament`) выбранного календаря. Ответ `200` — обновлённая запись игрушки в том же формате. Повторное размещение в том же слоте возвращает прежнее состояние и даты. Ошибки: `404 ADVENT_CALENDAR_NOT_FOUND`, `404 USER_ORNAMENT_NOT_FOUND` (включая чужую игрушку и игрушку другого года), `409 TREE_SLOT_OCCUPIED`, `422 VALIDATION_ERROR` для UUID, года или слота. Конкурентное занятие одного слота защищено уникальным индексом БД. Оба маршрута и ошибки имеют `Cache-Control: no-store`.
+
+Frontend использует same-origin `GET /api/tree` и `POST /api/tree/ornaments/{uuid}/place`. Обработчик мутации проверяет сессию, `Origin` и JSON `Content-Type`; bearer token остаётся на сервере Next.js.
+
 ## Аутентификация и граница доверия
 
 Реализация входа и модели User запланирована задачей 02, клиентской оболочки — задачей 03. Их общий контракт:
