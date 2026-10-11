@@ -1,4 +1,4 @@
-import { TaskContent } from "@/components/task-content";
+import { TaskContent, TaskMarkdown } from "@/components/task-content";
 import { ApiError } from "@/lib/api";
 import { getCalendar, getCalendarDay } from "@/lib/calendar-server";
 import type { CalendarDaySummary } from "@/lib/calendar";
@@ -60,6 +60,15 @@ export default async function DayPage({ params }: Props) {
     <Link href="/cabinet" className={styles.backLink}>← К календарю</Link>
     <div className={styles.dayHeader}><p className={styles.eyebrow}>День {day} · {formatLongDate(detail.availableOn)}</p><h1>{detail.status === "completed" ? "Задание выполнено" : "Задание дня"}</h1></div>
     <TaskContent title={detail.task.title} content={detail.task.content} imageUrl={detail.task.imageUrl} />
-    <CompletionControl day={day} year={calendar.year} completed={detail.status === "completed"} />
+    <CompletionControl day={day} year={calendar.year} completed={detail.status === "completed"} answerType={detail.task.answerType} choices={detail.task.choices ?? []} />
+    {detail.status === "completed" && <section className={styles.answerSection} aria-label="Ответ и решение">
+      {detail.task.correctAnswer || detail.task.solution ? <details className={styles.answerDisclosure}>
+        <summary>{detail.task.correctAnswer && detail.task.solution ? "Показать ответ и решение" : detail.task.correctAnswer ? "Показать ответ" : "Показать решение"}</summary>
+        <div className={styles.answerContent}>
+          {detail.task.correctAnswer && <div><h2>Правильный ответ</h2><TaskMarkdown content={detail.task.correctAnswer} /></div>}
+          {detail.task.solution && <div><h2>Решение</h2><TaskMarkdown content={detail.task.solution} /></div>}
+        </div>
+      </details> : <p className={styles.answerEmpty}>Ответ и решение для этого задания пока не добавлены.</p>}
+    </section>}
   </section>;
 }

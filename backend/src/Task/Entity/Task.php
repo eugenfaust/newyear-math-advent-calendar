@@ -31,6 +31,10 @@ class Task
     #[ORM\Column(name: 'correct_answer', type: 'text', nullable: true)]
     private ?string $correctAnswer = null;
 
+    /** @var list<string>|null */
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $choices = null;
+
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $solution = null;
 
@@ -61,6 +65,8 @@ class Task
     public function getImagePath(): ?string { return $this->imagePath; }
     public function getAnswerType(): AnswerType { return $this->answerType; }
     public function getCorrectAnswer(): ?string { return $this->correctAnswer; }
+    /** @return list<string>|null */
+    public function getChoices(): ?array { return $this->choices; }
     public function getSolution(): ?string { return $this->solution; }
     public function isActive(): bool { return $this->isActive; }
     public function getCreatedAt(): \DateTimeImmutable { return $this->createdAt; }
@@ -69,14 +75,19 @@ class Task
     public function setTitle(string $title): void { $this->title = $title; $this->touch(); }
     public function setContent(string $content): void { $this->content = $content; $this->touch(); }
     public function setImagePath(?string $path): void { $this->imagePath = $path; $this->touch(); }
+    public function setAnswerType(AnswerType $type): void { $this->answerType = $type; $this->touch(); }
     public function setCorrectAnswer(?string $answer): void { $this->correctAnswer = $answer; $this->touch(); }
+    /** @param list<string>|null $choices */
+    public function setChoices(?array $choices): void { $this->choices = $choices; $this->touch(); }
     public function setSolution(?string $solution): void { $this->solution = $solution; $this->touch(); }
     public function setActive(bool $active): void { $this->isActive = $active; $this->touch(); }
     private function touch(): void { $this->updatedAt = new \DateTimeImmutable('now', new \DateTimeZone('UTC')); }
 
     public function toUserArray(?string $imageUrl): array
     {
-        return ['uuid' => $this->uuid, 'title' => $this->title, 'content' => $this->content,
+        $result = ['uuid' => $this->uuid, 'title' => $this->title, 'content' => $this->content,
             'imageUrl' => $imageUrl, 'answerType' => $this->answerType->value];
+        if ($this->answerType === AnswerType::MULTIPLE_CHOICE) $result['choices'] = $this->choices;
+        return $result;
     }
 }

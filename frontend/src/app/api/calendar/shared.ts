@@ -31,10 +31,11 @@ export async function forwardCalendarCompletion(request: NextRequest, day: strin
   const baseUrl = process.env.INTERNAL_API_URL;
   if (!baseUrl) return error("SERVICE_UNAVAILABLE", "Сервис недоступен", 503);
   try {
+    const body = await request.text();
     const response = await fetch(`${baseUrl}/calendar/days/${day}/complete${request.nextUrl.search}`, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-      body: "{}",
+      body,
       cache: "no-store",
     });
     return new NextResponse(await response.text(), {

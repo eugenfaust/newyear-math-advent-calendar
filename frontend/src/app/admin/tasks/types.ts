@@ -3,7 +3,8 @@ export type ManagedTask = {
   title: string;
   content: string;
   imageUrl: string | null;
-  answerType: "NONE";
+  answerType: "NONE" | "NUMBER" | "TEXT" | "MULTIPLE_CHOICE";
+  choices: string[] | null;
   correctAnswer: string | null;
   solution: string | null;
   isActive: boolean;

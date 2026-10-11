@@ -41,6 +41,7 @@ try {
     $template = new AdventTemplate('Calendar API smoke');
     $task = new Task('Safe title', 'Safe content');
     $task->setCorrectAnswer('private answer');
+    $task->setSolution('private solution');
     foreach ([$owner, $other, $template, $task] as $entity) $em->persist($entity);
     $calendar = new AdventCalendar($owner, $template, 2026);
     $em->persist($calendar);
@@ -82,6 +83,12 @@ try {
     check($opened['openedAt'] === '2026-11-30T21:00:00Z', 'First opening not recorded.');
     check($calendar->getStartedAt()?->format('Y-m-d\TH:i:s\Z') === $opened['openedAt'], 'Calendar start not recorded.');
     check(!array_key_exists('correctAnswer', $opened['task']) && !array_key_exists('solution', $opened['task']), 'Private task data disclosed.');
+    $completedProgress = $em->getRepository(AdventDayProgress::class)->findOneBy(['calendar' => $calendar, 'day' => 2]);
+    $completedProgress->complete($time('2026-12-02 12:00:00'));
+    $em->flush();
+    $completed = $service->day($owner, 2026, 2, $time('2026-12-05 12:00:00'));
+    check($completed['status'] === 'completed', 'Completed day was not readable after the deadline.');
+    check($completed['task']['correctAnswer'] === 'private answer' && $completed['task']['solution'] === 'private solution', 'Completed day did not reveal its answer and solution.');
     $reopened = $service->day($owner, 2026, 1, $time('2026-12-02 12:00:00'));
     check($reopened['openedAt'] === $opened['openedAt'], 'Repeated opening changed openedAt.');
     try { $service->day($owner, 2026, 1, $time('2026-12-03 21:00:00')); throw new RuntimeException('Expired day opened.'); }
@@ -141,7 +148,9 @@ try {
     $missing = $requestProgress('/api/v1/admin/users/'.$owner->getUuid().'/calendars/2027/progress', $otherToken);
     check($missing->getStatusCode() === 404, 'Missing calendar progress was accessible.');
     $completion = new CompleteAdventDayService($em, $availability, new LocalOrnamentImageStorage('/uploads'));
-    try { $completion->complete($owner, 2026, 1, $time('2026-12-03 21:00:00')); throw new RuntimeException('Expired day was completed.'); }
+    $managedOwner = $em->find(User::class, $owner->getUuid());
+    check($managedOwner instanceof User, 'Owner disappeared before completion check.');
+    try { $completion->complete($managedOwner, 2026, 1, $time('2026-12-03 21:00:00')); throw new RuntimeException('Expired day was completed.'); }
     catch (CalendarAccessException $error) { check($error->errorCode === 'ADVENT_DAY_EXPIRED' && $error->httpStatus === 403, 'Wrong expired completion error.'); }
 } finally {
     $connection->rollBack();

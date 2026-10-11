@@ -23,7 +23,10 @@ export type CalendarTask = {
   title: string;
   content: string;
   imageUrl: string | null;
-  answerType: "NONE";
+  answerType: "NONE" | "NUMBER" | "TEXT" | "MULTIPLE_CHOICE";
+  choices?: string[] | null;
+  correctAnswer?: string | null;
+  solution?: string | null;
 };
 
 export type CalendarDay = Omit<CalendarDaySummary, "status"> & {

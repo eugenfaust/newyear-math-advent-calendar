@@ -4,7 +4,7 @@
 
 ## Сделать
 
-- Создать `Task`: UUID, title, Markdown content, nullable imagePath/solution/correctAnswer, enum answerType, isActive, даты; миграция.
+- Создать `Task`: UUID, title, Markdown content, nullable imagePath/solution/correctAnswer/choices, enum answerType, isActive, даты; миграция. Для проверяемых типов валидировать правильный ответ и варианты выбора.
 - Реализовать admin CRUD, поиск/фильтры и деактивацию. В MVP создание и выполнение допускают только `NONE`; поля иных типов не запускают автоматическую проверку.
 - Сделать абстракцию хранилища файлов с реализацией `/uploads`, чтобы переход на S3/MinIO не менял доменные сущности.
 - Проверять размер, тип и содержимое загружаемых изображений; выдавать публичный URL безопасно. Не раскрывать `correctAnswer` в пользовательском DTO до выполнения.

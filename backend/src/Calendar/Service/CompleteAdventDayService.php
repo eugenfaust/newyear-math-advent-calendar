@@ -9,6 +9,8 @@ use App\Calendar\Entity\AdventDayProgress;
 use App\Ornament\Entity\Ornament;
 use App\Ornament\Entity\UserOrnament;
 use App\Ornament\Storage\OrnamentImageStorage;
+use App\Task\AnswerMatcher;
+use App\Task\AnswerType;
 use App\User\Entity\User;
 use Doctrine\DBAL\LockMode;
 use Doctrine\ORM\EntityManagerInterface;
@@ -21,9 +23,9 @@ final class CompleteAdventDayService
         private OrnamentImageStorage $images,
     ) {}
 
-    public function complete(User $user, int $year, int $day, \DateTimeImmutable $now): array
+    public function complete(User $user, int $year, int $day, \DateTimeImmutable $now, ?string $answer = null): array
     {
-        return $this->em->wrapInTransaction(function () use ($user, $year, $day, $now): array {
+        $result = $this->em->wrapInTransaction(function () use ($user, $year, $day, $now, $answer): array {
             // Serialise this user's rewards, including completions in different calendars.
             $this->em->lock($user, LockMode::PESSIMISTIC_WRITE);
             $calendar = $this->em->getRepository(AdventCalendar::class)->findOneBy(['user' => $user, 'year' => $year]);
@@ -46,6 +48,19 @@ final class CompleteAdventDayService
                 return $this->result($progress, $reward);
             }
 
+            $task = $progress->getTask();
+            $answerType = $task->getAnswerType();
+            if ($answerType !== AnswerType::NONE) {
+                if ($answer === null || trim($answer) === '') {
+                    return ['error' => 'ANSWER_REQUIRED'];
+                }
+                $expected = $task->getCorrectAnswer();
+                if ($expected === null) throw new \LogicException('Checked task has no correct answer.');
+                if (!AnswerMatcher::matches($answerType, $expected, $answer)) {
+                    return ['error' => 'INCORRECT_ANSWER'];
+                }
+            }
+
             $ornament = $this->chooseOrnament($user);
             if (!$ornament) throw new CalendarAccessException('NO_ACTIVE_ORNAMENTS', 409, 'No active ornaments are available.');
             $progress->complete($now);
@@ -54,6 +69,13 @@ final class CompleteAdventDayService
             $this->em->persist($reward);
             return $this->result($progress, $reward);
         });
+        if (($result['error'] ?? null) === 'ANSWER_REQUIRED') {
+            throw new CalendarAccessException('VALIDATION_ERROR', 422, 'Answer is required.');
+        }
+        if (($result['error'] ?? null) === 'INCORRECT_ANSWER') {
+            throw new CalendarAccessException('INCORRECT_ANSWER', 422, 'Incorrect answer. Try again.');
+        }
+        return $result;
     }
 
     private function chooseOrnament(User $user): ?Ornament

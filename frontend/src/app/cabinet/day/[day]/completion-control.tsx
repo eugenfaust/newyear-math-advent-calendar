@@ -1,6 +1,6 @@
 "use client";
 
-import type { CalendarDayCompletion } from "@/lib/calendar";
+import type { CalendarDayCompletion, CalendarTask } from "@/lib/calendar";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import { motion, useReducedMotion } from "motion/react";
@@ -19,6 +19,8 @@ function errorMessage(error: unknown): string {
   if (!isCompletionError(error)) return "Не удалось завершить задание. Проверьте соединение и попробуйте ещё раз.";
   switch (error.code) {
     case "NO_ACTIVE_ORNAMENTS": return "Пока нет игрушек для награды. Попробуйте завершить задание позже.";
+    case "INCORRECT_ANSWER": return "Ответ неверный. Попробуйте ещё раз.";
+    case "VALIDATION_ERROR": return "Введите ответ и попробуйте ещё раз.";
     case "ADVENT_DAY_LOCKED": return "Этот день ещё закрыт. Обновите страницу, чтобы увидеть дату открытия.";
     case "ADVENT_DAY_EXPIRED": return "Срок выполнения этого задания истёк. Обновите календарь.";
     case "ADVENT_CALENDAR_NOT_FOUND": return "Календарь не найден. Вернитесь к списку дней и обновите страницу.";
@@ -30,11 +32,11 @@ function errorMessage(error: unknown): string {
   }
 }
 
-async function completeDay(day: number, year: number): Promise<CalendarDayCompletion> {
+async function completeDay(day: number, year: number, answer?: string): Promise<CalendarDayCompletion> {
   const response = await fetch(`/api/calendar/days/${day}/complete?year=${year}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: "{}",
+    body: JSON.stringify(answer === undefined ? {} : { answer }),
     cache: "no-store",
   });
   const body: unknown = await response.json().catch(() => null);
@@ -42,15 +44,16 @@ async function completeDay(day: number, year: number): Promise<CalendarDayComple
   return body as CalendarDayCompletion;
 }
 
-export function CompletionControl({ day, year, completed }: { day: number; year: number; completed: boolean }) {
+export function CompletionControl({ day, year, completed, answerType, choices }: { day: number; year: number; completed: boolean; answerType: CalendarTask["answerType"]; choices: string[] }) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [reward, setReward] = useState<CalendarDayCompletion["reward"] | null>(null);
   const [imageFailed, setImageFailed] = useState(false);
+  const [answer, setAnswer] = useState("");
   const reducedMotion = useReducedMotion();
   const mutation = useMutation({
-    mutationFn: () => completeDay(day, year),
+    mutationFn: (submitted?: string) => completeDay(day, year, submitted),
     onSuccess: (result) => {
       setImageFailed(false);
       setReward(result.reward);
@@ -66,12 +69,19 @@ export function CompletionControl({ day, year, completed }: { day: number; year:
   }, [reward]);
 
   return <>
-    {completed || reward ? <p className={styles.completedNote}>Вы выполнили это задание.</p> : <div className={styles.completionArea}>
-      <button type="button" className={styles.completeButton} disabled={mutation.isPending} onClick={() => mutation.mutate()}>
-        {mutation.isPending ? "Выдаём игрушку…" : "Задание выполнено"}
+    {completed || reward ? <p className={styles.completedNote}>Вы выполнили это задание.</p> : <form className={styles.completionArea} onSubmit={(event) => { event.preventDefault(); if (!mutation.isPending) mutation.mutate(answerType === "NONE" ? undefined : answer); }}>
+      {answerType === "MULTIPLE_CHOICE" ? <fieldset className={styles.answerChoices}>
+        <legend>Выберите ответ</legend>
+        {choices.map((choice, index) => <label key={index} className={styles.answerChoice}><input type="radio" name="answer" value={choice} checked={answer === choice} onChange={() => { setAnswer(choice); mutation.reset(); }} required />{choice}</label>)}
+      </fieldset> : answerType !== "NONE" && <label className={styles.answerLabel} htmlFor="day-answer">
+        Ваш ответ
+        <input id="day-answer" className={styles.answerInput} type="text" inputMode={answerType === "NUMBER" ? "decimal" : "text"} value={answer} onChange={(event) => { setAnswer(event.target.value); mutation.reset(); }} maxLength={10000} required aria-invalid={mutation.isError && isCompletionError(mutation.error) && mutation.error.code === "INCORRECT_ANSWER"} />
+      </label>}
+      <button type="submit" className={styles.completeButton} disabled={mutation.isPending}>
+        {mutation.isPending ? "Проверяем ответ…" : answerType === "NONE" ? "Задание выполнено" : "Проверить ответ"}
       </button>
       {mutation.isError && <p className={styles.completionError} role="alert">{errorMessage(mutation.error)}</p>}
-    </div>}
+    </form>}
     <dialog ref={dialogRef} className={styles.rewardDialog} aria-labelledby="reward-title" onClose={() => setReward(null)}>
       {reward && <div className={styles.rewardCard}>
         <p className={styles.eyebrow}>День {day} завершён</p>

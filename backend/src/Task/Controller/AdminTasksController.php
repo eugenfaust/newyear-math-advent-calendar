@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Task\Controller;
 
+use App\Task\AnswerMatcher;
+use App\Task\AnswerType;
 use App\Task\Entity\Task;
 use App\Task\Storage\ImageProcessor;
 use App\Task\Storage\ImageStorage;
@@ -60,6 +62,8 @@ final class AdminTasksController
         $errors = $this->checkFields($data, true);
         if ($errors) return $this->validation($errors);
         $task = new Task(trim($data['title']), $data['content']);
+        $task->setAnswerType(AnswerType::from($data['answerType'] ?? 'NONE'));
+        $task->setChoices($data['choices'] ?? null);
         $task->setSolution($data['solution'] ?? null);
         $task->setCorrectAnswer($data['correctAnswer'] ?? null);
         $task->setActive($data['isActive'] ?? true);
@@ -75,11 +79,13 @@ final class AdminTasksController
         if (!$task) return $this->notFound();
         $data = $this->readJson($request);
         if ($data instanceof JsonResponse) return $data;
-        $errors = $this->checkFields($data, false);
+        $errors = $this->checkFields($data, false, $task);
         if (!$data) $errors[] = ['field' => 'body', 'message' => 'Provide at least one field.'];
         if ($errors) return $this->validation($errors);
         if (array_key_exists('title', $data)) $task->setTitle(trim($data['title']));
         if (array_key_exists('content', $data)) $task->setContent($data['content']);
+        if (array_key_exists('answerType', $data)) $task->setAnswerType(AnswerType::from($data['answerType']));
+        if (array_key_exists('choices', $data)) $task->setChoices($data['choices']);
         if (array_key_exists('solution', $data)) $task->setSolution($data['solution']);
         if (array_key_exists('correctAnswer', $data)) $task->setCorrectAnswer($data['correctAnswer']);
         if (array_key_exists('isActive', $data)) $task->setActive($data['isActive']);
@@ -143,19 +149,45 @@ final class AdminTasksController
         return is_object($data) ? (array) $data : $this->validation([['field' => 'body', 'message' => 'Expected an object.']]);
     }
 
-    private function checkFields(array $data, bool $create): array
+    private function checkFields(array $data, bool $create, ?Task $task = null): array
     {
         $errors = [];
         foreach ($data as $field => $value) {
-            if (!in_array($field, ['title', 'content', 'answerType', 'correctAnswer', 'solution', 'isActive'], true)) $errors[] = ['field' => $field, 'message' => 'Unknown field.'];
+            if (!in_array($field, ['title', 'content', 'answerType', 'choices', 'correctAnswer', 'solution', 'isActive'], true)) $errors[] = ['field' => $field, 'message' => 'Unknown field.'];
         }
         foreach (['title', 'content'] as $field) {
             if ($create && !array_key_exists($field, $data)) $errors[] = ['field' => $field, 'message' => 'Required.'];
         }
         if (array_key_exists('title', $data) && (!is_string($data['title']) || trim($data['title']) === '' || mb_strlen(trim($data['title'])) > 150)) $errors[] = ['field' => 'title', 'message' => 'Title must be 1–150 characters.'];
         if (array_key_exists('content', $data) && (!is_string($data['content']) || trim($data['content']) === '' || mb_strlen($data['content']) > 50000)) $errors[] = ['field' => 'content', 'message' => 'Content must be 1–50000 characters.'];
-        if (array_key_exists('answerType', $data) && $data['answerType'] !== 'NONE') $errors[] = ['field' => 'answerType', 'message' => 'Only NONE is supported in MVP.'];
+        if (array_key_exists('answerType', $data) && !in_array($data['answerType'], ['NONE', 'NUMBER', 'TEXT', 'MULTIPLE_CHOICE'], true)) $errors[] = ['field' => 'answerType', 'message' => 'Expected NONE, NUMBER, TEXT or MULTIPLE_CHOICE.'];
         if (array_key_exists('correctAnswer', $data) && $data['correctAnswer'] !== null && (!is_string($data['correctAnswer']) || mb_strlen($data['correctAnswer']) > 10000)) $errors[] = ['field' => 'correctAnswer', 'message' => 'Expected text up to 10000 characters or null.'];
+        $type = $data['answerType'] ?? $task?->getAnswerType()->value ?? 'NONE';
+        $answer = array_key_exists('correctAnswer', $data) ? $data['correctAnswer'] : $task?->getCorrectAnswer();
+        if (in_array($type, ['NUMBER', 'TEXT', 'MULTIPLE_CHOICE'], true) && (!is_string($answer) || trim($answer) === '')) {
+            $errors[] = ['field' => 'correctAnswer', 'message' => 'Correct answer is required for automatic checking.'];
+        } elseif ($type === 'NUMBER' && is_string($answer) && !AnswerMatcher::isNumber($answer)) {
+            $errors[] = ['field' => 'correctAnswer', 'message' => 'Expected a number, with an optional decimal point or comma.'];
+        }
+        $choices = array_key_exists('choices', $data) ? $data['choices'] : $task?->getChoices();
+        if ($type === 'MULTIPLE_CHOICE') {
+            if (!is_array($choices) || !array_is_list($choices) || count($choices) < 2 || count($choices) > 8
+                || count(array_unique($choices, SORT_REGULAR)) !== count($choices)) {
+                $errors[] = ['field' => 'choices', 'message' => 'Provide 2–8 distinct options.'];
+            } else {
+                foreach ($choices as $choice) {
+                    if (!is_string($choice) || trim($choice) === '' || mb_strlen($choice) > 200) {
+                        $errors[] = ['field' => 'choices', 'message' => 'Each option must contain 1–200 characters.'];
+                        break;
+                    }
+                }
+                if (is_string($answer) && !in_array($answer, $choices, true)) {
+                    $errors[] = ['field' => 'correctAnswer', 'message' => 'Correct answer must match one option exactly.'];
+                }
+            }
+        } elseif ($choices !== null && $choices !== []) {
+            $errors[] = ['field' => 'choices', 'message' => 'Options are only allowed for multiple choice.'];
+        }
         if (array_key_exists('solution', $data) && $data['solution'] !== null && (!is_string($data['solution']) || mb_strlen($data['solution']) > 50000)) $errors[] = ['field' => 'solution', 'message' => 'Expected text up to 50000 characters or null.'];
         if (array_key_exists('isActive', $data) && !is_bool($data['isActive'])) $errors[] = ['field' => 'isActive', 'message' => 'Expected a boolean.'];
         return $errors;
@@ -166,7 +198,7 @@ final class AdminTasksController
         return ['uuid' => $task->getUuid(), 'title' => $task->getTitle(), 'content' => $task->getContent(),
             'imageUrl' => $task->getImagePath() === null ? null : $this->storage->publicUrl($task->getImagePath()),
             'answerType' => $task->getAnswerType()->value, 'correctAnswer' => $task->getCorrectAnswer(),
-            'solution' => $task->getSolution(), 'isActive' => $task->isActive(),
+            'choices' => $task->getChoices(), 'solution' => $task->getSolution(), 'isActive' => $task->isActive(),
             'createdAt' => $task->getCreatedAt()->format('Y-m-d\TH:i:s\Z'),
             'updatedAt' => $task->getUpdatedAt()->format('Y-m-d\TH:i:s\Z')];
     }

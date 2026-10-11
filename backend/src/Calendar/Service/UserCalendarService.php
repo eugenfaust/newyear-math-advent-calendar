@@ -70,13 +70,18 @@ final class UserCalendarService
         });
         $task = $result->getTask();
         $imagePath = $task->getImagePath();
+        $taskData = $task->toUserArray($imagePath === null ? null : $this->images->publicUrl($imagePath));
+        if ($result->getCompletedAt() !== null) {
+            $taskData['correctAnswer'] = $task->getCorrectAnswer();
+            $taskData['solution'] = $task->getSolution();
+        }
         return [
             'day' => $day, 'year' => $year,
             'status' => $this->availability->status($result, $now),
             'availableOn' => $this->availability->availableOn($year, $day),
             'openedAt' => $this->utc($result->getOpenedAt()),
             'completedAt' => $this->utc($result->getCompletedAt()),
-            'task' => $task->toUserArray($imagePath === null ? null : $this->images->publicUrl($imagePath)),
+            'task' => $taskData,
         ];
     }
 

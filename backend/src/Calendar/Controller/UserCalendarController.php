@@ -52,10 +52,18 @@ final class UserCalendarController
         if (!str_starts_with(strtolower($request->headers->get('Content-Type', '')), 'application/json')) {
             return $this->response(['code' => 'UNSUPPORTED_MEDIA_TYPE', 'message' => 'Expected application/json.'], 415);
         }
+        try { $decoded = json_decode($request->getContent(), false, 512, JSON_THROW_ON_ERROR); }
+        catch (\JsonException) { return $this->response(['code' => 'INVALID_JSON', 'message' => 'Invalid JSON.'], 400); }
+        if (!is_object($decoded)) return $this->validation('body', 'Expected an object.');
+        $body = (array) $decoded;
+        if (array_diff(array_keys($body), ['answer'])
+            || (array_key_exists('answer', $body) && (!is_string($body['answer']) || mb_strlen($body['answer']) > 10000))) {
+            return $this->validation('answer', 'Expected an optional text answer up to 10000 characters.');
+        }
         $now = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
         $year = $this->year($request, $now);
         if ($year instanceof JsonResponse) return $year;
-        try { return $this->response($this->completion->complete($this->user(), $year, (int) $day, $now)); }
+        try { return $this->response($this->completion->complete($this->user(), $year, (int) $day, $now, $body['answer'] ?? null)); }
         catch (CalendarAccessException $error) { return $this->error($error); }
     }
 

@@ -16,12 +16,22 @@ import styles from "./tasks.module.scss";
 const schema = z.object({
   title: z.string().trim().min(1, "Введите название").max(150, "Максимум 150 символов"),
   content: z.string().min(1, "Введите текст задания").max(50000, "Максимум 50 000 символов").refine((value) => value.trim().length > 0, "Введите текст задания"),
+  answerType: z.enum(["NONE", "NUMBER", "TEXT", "MULTIPLE_CHOICE"]),
+  choicesText: z.string().max(2000, "Слишком длинный список вариантов"),
   correctAnswer: z.string().max(10000, "Максимум 10 000 символов"),
   solution: z.string().max(50000, "Максимум 50 000 символов"),
   isActive: z.boolean(),
+}).superRefine((value, context) => {
+  if (value.answerType !== "NONE" && !value.correctAnswer.trim()) context.addIssue({ code: "custom", path: ["correctAnswer"], message: "Укажите правильный ответ" });
+  if (value.answerType === "NUMBER" && value.correctAnswer.trim() && !/^[+-]?[0-9]+(?:[.,][0-9]+)?$/.test(value.correctAnswer.trim())) context.addIssue({ code: "custom", path: ["correctAnswer"], message: "Укажите число с точкой или запятой" });
+  if (value.answerType === "MULTIPLE_CHOICE") {
+    const choices = value.choicesText.split("\n").map((choice) => choice.trim()).filter(Boolean);
+    if (choices.length < 2 || choices.length > 8 || new Set(choices).size !== choices.length) context.addIssue({ code: "custom", path: ["choicesText"], message: "Укажите от 2 до 8 разных вариантов" });
+    if (value.correctAnswer && !choices.includes(value.correctAnswer)) context.addIssue({ code: "custom", path: ["correctAnswer"], message: "Выберите один из вариантов" });
+  }
 });
 type Values = z.infer<typeof schema>;
-const defaults: Values = { title: "", content: "", correctAnswer: "", solution: "", isActive: true };
+const defaults: Values = { title: "", content: "", answerType: "NONE", choicesText: "", correctAnswer: "", solution: "", isActive: true };
 
 export function TaskEditor({ uuid }: { uuid?: string }) {
   const router = useRouter();
@@ -42,7 +52,7 @@ export function TaskEditor({ uuid }: { uuid?: string }) {
   const { control, handleSubmit, reset, setError, watch, formState: { errors, isSubmitting } } = useForm<Values>({ resolver: zodResolver(schema), defaultValues: defaults });
   const values = watch();
   useEffect(() => {
-    if (task.data) reset({ title: task.data.title, content: task.data.content, correctAnswer: task.data.correctAnswer ?? "", solution: task.data.solution ?? "", isActive: task.data.isActive });
+    if (task.data) reset({ title: task.data.title, content: task.data.content, answerType: task.data.answerType, choicesText: task.data.choices?.join("\n") ?? "", correctAnswer: task.data.correctAnswer ?? "", solution: task.data.solution ?? "", isActive: task.data.isActive });
   }, [task.data, reset]);
   useEffect(() => {
     if (!imageFile) { setImagePreview(null); return; }
@@ -65,6 +75,7 @@ export function TaskEditor({ uuid }: { uuid?: string }) {
   function showProblem(problem: ApiProblem) {
     for (const detail of problem.details ?? []) {
       if (detail.field === "image") setImageError(detail.message);
+      else if (detail.field === "choices") setError("choicesText", { message: detail.message });
       else if (detail.field in defaults) setError(detail.field as keyof Values, { message: detail.message });
     }
     setError("root", { message: problem.message || "Не удалось сохранить задание" });
@@ -73,7 +84,8 @@ export function TaskEditor({ uuid }: { uuid?: string }) {
   const submit = handleSubmit(async (form) => {
     setNotice("");
     setImageError("");
-    const payload = { title: form.title.trim(), content: form.content, answerType: "NONE", correctAnswer: form.correctAnswer || null, solution: form.solution || null, isActive: form.isActive };
+    const choices = form.answerType === "MULTIPLE_CHOICE" ? form.choicesText.split("\n").map((choice) => choice.trim()).filter(Boolean) : null;
+    const payload = { title: form.title.trim(), content: form.content, answerType: form.answerType, choices, correctAnswer: form.correctAnswer || null, solution: form.solution || null, isActive: form.isActive };
     try {
       const saved = await readTaskResponse<ManagedTask>(await fetch(currentId ? `/api/admin/tasks/${currentId}` : "/api/admin/tasks", {
         method: currentId ? "PATCH" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload),
@@ -87,7 +99,7 @@ export function TaskEditor({ uuid }: { uuid?: string }) {
         setImageFile(null);
       }
       setSavedImageUrl(result.imageUrl);
-      reset({ title: result.title, content: result.content, correctAnswer: result.correctAnswer ?? "", solution: result.solution ?? "", isActive: result.isActive });
+      reset({ title: result.title, content: result.content, answerType: result.answerType, choicesText: result.choices?.join("\n") ?? "", correctAnswer: result.correctAnswer ?? "", solution: result.solution ?? "", isActive: result.isActive });
       client.setQueryData(["admin-task", result.uuid], result);
       await client.invalidateQueries({ queryKey: ["admin-tasks"] });
       setNotice("Задание сохранено");
@@ -123,6 +135,7 @@ export function TaskEditor({ uuid }: { uuid?: string }) {
 
   const loading = Boolean(uuid) && task.isPending;
   const savedImage = savedImageUrl === undefined ? task.data?.imageUrl : savedImageUrl;
+  const choices = values.choicesText.split("\n").map((choice) => choice.trim()).filter(Boolean);
   return <section className={styles.section}>
     <Link href="/admin/tasks" className={styles.back}>← К заданиям</Link>
     <header className={styles.heading}><div><span className={styles.eyebrow}>Библиотека · Редактор</span><h1>{uuid ? "Редактировать задание" : "Новое задание"}</h1><p>Текст и формулы справа показываются так же, как на странице дня.</p></div></header>
@@ -131,8 +144,9 @@ export function TaskEditor({ uuid }: { uuid?: string }) {
         <Controller name="title" control={control} render={({ field, fieldState }) => <TextInput label="Название" value={field.value} onChange={field.onChange} onBlur={field.onBlur} htmlName={field.name} ref={field.ref} isRequired width="100%" status={fieldState.error ? { type: "error", message: fieldState.error.message } : undefined} />} />
         <label className={styles.field}>Текст задания <span className={styles.hint}>Markdown; формулы: $...$ и $$...$$</span><Controller name="content" control={control} render={({ field }) => <textarea {...field} rows={12} aria-invalid={Boolean(errors.content)} aria-describedby={errors.content ? "content-error" : undefined} />} />{errors.content && <span id="content-error" className={styles.error}>{errors.content.message}</span>}</label>
         <div className={styles.imageField}><label className={styles.field}>Изображение <span className={styles.hint}>PNG, JPEG или WebP, до 5 МБ и 8 Мп</span><input type="file" accept="image/png,image/jpeg,image/webp" onChange={(event) => chooseImage(event.target.files?.[0])} /></label>{(imageFile || savedImage) && <button type="button" className={styles.textButton} onClick={removeImage} disabled={busy}>Убрать изображение</button>}{imageError && <span role="alert" className={styles.error}>{imageError}</span>}</div>
-        <label className={styles.field}>Тип ответа<select value="NONE" disabled><option value="NONE">Без автоматической проверки</option></select></label>
-        <Controller name="correctAnswer" control={control} render={({ field }) => <label className={styles.field}>Правильный ответ <span className={styles.hint}>Не показывается пользователю до выполнения</span><textarea {...field} rows={2} aria-invalid={Boolean(errors.correctAnswer)} /></label>} />
+        <label className={styles.field}>Тип ответа<Controller name="answerType" control={control} render={({ field }) => <select {...field}><option value="NONE">Без проверки</option><option value="NUMBER">Число</option><option value="TEXT">Текст</option><option value="MULTIPLE_CHOICE">Выбор варианта</option></select>} /></label>
+        {values.answerType === "MULTIPLE_CHOICE" && <><Controller name="choicesText" control={control} render={({ field }) => <label className={styles.field}>Варианты ответа <span className={styles.hint}>Один вариант на строку, от 2 до 8</span><textarea {...field} rows={6} aria-invalid={Boolean(errors.choicesText)} /></label>} />{errors.choicesText && <span className={styles.error}>{errors.choicesText.message}</span>}</>}
+        <Controller name="correctAnswer" control={control} render={({ field }) => <label className={styles.field}>Правильный ответ <span className={styles.hint}>Показывается пользователю после выполнения</span>{values.answerType === "MULTIPLE_CHOICE" ? <select {...field} aria-invalid={Boolean(errors.correctAnswer)}><option value="">Выберите правильный вариант</option>{choices.map((choice, index) => <option key={index} value={choice}>{choice}</option>)}</select> : <textarea {...field} rows={2} aria-invalid={Boolean(errors.correctAnswer)} />}</label>} />
         {errors.correctAnswer && <span className={styles.error}>{errors.correctAnswer.message}</span>}
         <Controller name="solution" control={control} render={({ field }) => <label className={styles.field}>Решение <textarea {...field} rows={5} aria-invalid={Boolean(errors.solution)} /></label>} />
         {errors.solution && <span className={styles.error}>{errors.solution.message}</span>}
