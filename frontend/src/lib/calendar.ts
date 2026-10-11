@@ -31,3 +31,6 @@ export type CalendarDay = Omit<CalendarDaySummary, "status"> & {
   status: "available" | "completed";
   task: CalendarTask;
 };
+
+export type CompletionReward = { uuid: string; name: string; imageUrl: string };
+export type CalendarDayCompletion = { completed: true; completedAt: string; reward: CompletionReward };

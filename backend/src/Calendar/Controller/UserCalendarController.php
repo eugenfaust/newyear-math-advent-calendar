@@ -6,6 +6,7 @@ namespace App\Calendar\Controller;
 
 use App\Calendar\Service\CalendarAccessException;
 use App\Calendar\Service\CalendarAvailability;
+use App\Calendar\Service\CompleteAdventDayService;
 use App\Calendar\Service\UserCalendarService;
 use App\User\Entity\User;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -19,6 +20,7 @@ final class UserCalendarController
     public function __construct(
         private UserCalendarService $calendars,
         private CalendarAvailability $availability,
+        private CompleteAdventDayService $completion,
         private TokenStorageInterface $tokens,
     ) {}
 
@@ -40,6 +42,20 @@ final class UserCalendarController
         $year = $this->year($request, $now);
         if ($year instanceof JsonResponse) return $year;
         try { return $this->response($this->calendars->day($this->user(), $year, (int) $day, $now)); }
+        catch (CalendarAccessException $error) { return $this->error($error); }
+    }
+
+    #[Route('/days/{day}/complete', methods: ['POST'])]
+    public function complete(string $day, Request $request): JsonResponse
+    {
+        if (!preg_match('/^(?:[1-9]|[12][0-9]|3[01])$/', $day)) return $this->validation('day', 'Expected a day from 1 to 31.');
+        if (!str_starts_with(strtolower($request->headers->get('Content-Type', '')), 'application/json')) {
+            return $this->response(['code' => 'UNSUPPORTED_MEDIA_TYPE', 'message' => 'Expected application/json.'], 415);
+        }
+        $now = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
+        $year = $this->year($request, $now);
+        if ($year instanceof JsonResponse) return $year;
+        try { return $this->response($this->completion->complete($this->user(), $year, (int) $day, $now)); }
         catch (CalendarAccessException $error) { return $this->error($error); }
     }
 

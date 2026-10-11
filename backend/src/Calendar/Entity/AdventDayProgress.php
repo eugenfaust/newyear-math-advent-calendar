@@ -61,4 +61,11 @@ class AdventDayProgress
     {
         if ($this->openedAt === null) $this->openedAt = $this->updatedAt = $now;
     }
+
+    public function complete(\DateTimeImmutable $now): void
+    {
+        if ($this->completedAt !== null) return;
+        $this->open($now);
+        $this->completedAt = $this->updatedAt = $now;
+    }
 }
