@@ -17,4 +17,18 @@
 .check input { width: 18px; height: 18px; }
 .error { color: #b42318; }
 .success { color: #067647; }
+.calendarPanel { display: grid; gap: 18px; padding: 24px; border: 1px solid #d4dcf1; border-radius: 14px; background: #f7f9ff; max-width: 760px; }
+.calendarHeading { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; }
+.calendarHeading h2 { margin: 4px 0 0; font-size: clamp(1.25rem, 2vw, 1.65rem); }
+.calendarEyebrow { font-size: .72rem; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; color: #435a9b; }
+.calendarCount { color: #435a9b; font-size: .85rem; }
+.calendarList { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.calendarList li { display: grid; grid-template-columns: 76px 1fr auto; align-items: center; gap: 14px; border: 1px solid #dce3f3; border-radius: 8px; padding: 10px 14px; background: #fff; }
+.calendarList strong { color: #263b7e; font-size: 1.25rem; font-variant-numeric: tabular-nums; }
+.calendarList small { color: #617093; }
+.calendarForm { display: grid; grid-template-columns: 120px minmax(200px, 1fr) auto; align-items: end; gap: 12px; }
+.calendarForm input, .calendarForm select { min-height: 42px; width: 100%; box-sizing: border-box; padding: 8px 12px; border: 1px solid #9ba9ca; border-radius: 6px; background: #fff; font: inherit; }
+.calendarForm :is(input, select):focus-visible { outline: 2px solid #435a9b; outline-offset: 2px; }
+.calendarPager { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 @media (max-width: 640px) { .heading, .search { flex-direction: column; align-items: stretch; } .table { min-width: 700px; } }
+@media (max-width: 640px) { .calendarPanel { padding: 18px; } .calendarHeading { align-items: flex-start; flex-direction: column; } .calendarForm { grid-template-columns: 1fr; } .calendarList li { grid-template-columns: 1fr; gap: 3px; } }

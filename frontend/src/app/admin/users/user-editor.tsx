@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { readResponse, type ApiProblem, type ManagedUser } from "./types";
+import { CalendarAssignment } from "./calendar-assignment";
 import styles from "./users.module.scss";
 
 const schema = z.object({
@@ -95,5 +96,6 @@ export function UserEditor({ uuid }: { uuid: string }) {
       {notice && <p role="status" className={styles.success}>{notice}</p>}
       <div className={styles.actions}><Button label={creating ? "Создать" : "Сохранить"} type="submit" variant="primary" isLoading={isSubmitting} />{!creating && isActive && <Button label="Отключить доступ" type="button" variant="secondary" onClick={deactivate} isLoading={deactivating} />}</div>
     </form>}
+    {!creating && !loading && !loadError && <CalendarAssignment uuid={uuid} />}
   </section>;
 }

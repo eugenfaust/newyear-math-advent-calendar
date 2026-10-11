@@ -12,6 +12,18 @@ export type UserList = {
   items: ManagedUser[];
   pagination: { page: number; perPage: number; total: number; totalPages: number };
 };
+export type AssignedCalendar = {
+  uuid: string;
+  year: number;
+  template: { uuid: string; name: string };
+  startedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+export type AssignedCalendarList = {
+  items: AssignedCalendar[];
+  pagination: { page: number; perPage: number; total: number; totalPages: number };
+};
 export type ApiProblem = { code: string; message: string; details?: { field: string; message: string }[] };
 
 export async function readResponse<T>(response: Response): Promise<T> {

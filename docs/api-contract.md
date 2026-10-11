@@ -78,3 +78,15 @@ DTO: `{uuid, name, imageUrl, isActive, createdAt, updatedAt}`. `imageUrl` рав
 - `POST /api/v1/admin/templates/{uuid}/duplicate` принимает `{}` или `{name: "..."}`. Без имени используется `<исходное название> (копия)`; если результат длиннее 150 символов, клиент должен передать короткое имя. Возвращает `201` с независимой копией шаблона и всех существующих назначений дней. Копирование атомарно; неполный шаблон тоже можно скопировать для дальнейшего редактирования.
 
 Список содержит `{items: TemplateSummary[], pagination}`. `TemplateSummary` — `{uuid, name, description, year, isActive, filledDays, isComplete, createdAt, updatedAt}`. Детальный DTO добавляет `days: [{day, task}]` для всех дней от 1 до 31, где `task` — `null` или `{uuid, title, isActive}`. `filledDays` считает назначенные дни; `isComplete` равно `filledDays === 31`. Отсутствующий шаблон — `404 TEMPLATE_NOT_FOUND`, отсутствующее задание при выборе — `404 TASK_NOT_FOUND`, неверные поля или номер дня — `422 VALIDATION_ERROR`.
+
+## Назначение календаря
+
+Администратор назначает календарь через `/api/v1/admin/users/{uuid}/calendars`; frontend использует одноимённый same-origin обработчик `/api/admin/users/{uuid}/calendars`. Нужны действующий bearer token и актуальная роль `ROLE_ADMIN`. Мутация проверяет `Origin` и JSON `Content-Type`. Ответы имеют `Cache-Control: no-store`.
+
+- `GET` принимает `page` и `perPage` по общим правилам списков. Возвращает `{items: AssignedCalendar[], pagination}` с сортировкой по году по убыванию и UUID по возрастанию. История всех годов сохраняется.
+- `POST` принимает `{templateUuid: "UUID", year: 2026}` и возвращает `201` с `AssignedCalendar`. Год — целое число от 1 до 9999. Шаблон должен быть активным, полностью заполненным и содержать только активные задания. Шаблон может иметь собственное поле `year` для каталога, но при назначении год календаря задаётся явно.
+- `AssignedCalendar` — `{uuid, year, template: {uuid, name}, startedAt, createdAt, updatedAt}`. `startedAt` изначально `null`; даты возвращаются в UTC.
+
+Создание календаря и всех 31 записей `AdventDayProgress` атомарно. Каждая запись сохраняет ссылку на выбранное для дня задание; изменение шаблона позднее не меняет эти ссылки. Сам текст задания остаётся общим. `UNIQUE(user_id, year)` и `UNIQUE(calendar_id, day)` закреплены в БД.
+
+Ошибки: `404 USER_NOT_FOUND` или `TEMPLATE_NOT_FOUND`; `409 CALENDAR_ALREADY_ASSIGNED` для повторного года, `TEMPLATE_INACTIVE` или `TEMPLATE_HAS_INACTIVE_TASK`; `422 TEMPLATE_INCOMPLETE` или `VALIDATION_ERROR` с `details`.
