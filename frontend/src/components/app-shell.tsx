@@ -14,7 +14,7 @@ export function AppShell({ user, area, children }: { user: ApiUser; area: "cabin
     </header>
     <main className={styles.main}>
       <nav className={styles.nav} aria-label="Разделы"><Button label="Мой календарь" href="/cabinet" variant={area === "cabinet" ? "primary" : "secondary"} />{user.roles.includes("ROLE_ADMIN") && <Button label="Администрирование" href="/admin" variant={area === "admin" ? "primary" : "secondary"} />}</nav>
-      {area === "admin" && <nav className={styles.subnav} aria-label="Администрирование"><Link href="/admin/users">Пользователи</Link><Link href="/admin/tasks">Задания</Link></nav>}
+      {area === "admin" && <nav className={styles.subnav} aria-label="Администрирование"><Link href="/admin/users">Пользователи</Link><Link href="/admin/tasks">Задания</Link><Link href="/admin/ornaments">Игрушки</Link></nav>}
       <Card className={styles.content}>{children}</Card>
     </main>
   </div>;

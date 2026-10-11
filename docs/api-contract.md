@@ -52,3 +52,16 @@
 Frontend использует same-origin обработчики `/api/admin/tasks`, `/api/admin/tasks/{uuid}` и `/api/admin/tasks/{uuid}/image`. Для мутаций они проверяют `Origin` и тип содержимого; загрузка передаётся как `multipart/form-data` с единственным полем `image`. Bearer token остаётся на сервере Next.js. При создании задания frontend сначала отправляет JSON, затем загружает изображение по UUID созданного задания. Если загрузка не удалась, созданное задание сохраняется и файл можно отправить повторно.
 
 Административный DTO содержит `correctAnswer` и `solution`. Пользовательский DTO задания должен формироваться через `Task::toUserArray()` и не содержит `correctAnswer` до выполнения. Отсутствующее задание — `404 TASK_NOT_FOUND`, неверные поля или изображение — `422 VALIDATION_ERROR`. На frontend публичные URL `/uploads/tasks/*` проксируются к backend без передачи bearer token.
+
+## Библиотека игрушек
+
+Все маршруты `/api/v1/admin/ornaments` требуют актуальную роль `ROLE_ADMIN`. Ответы JSON не кешируются.
+
+- `GET /api/v1/admin/ornaments?page=1&perPage=20&search=...&isActive=true` возвращает стандартный список. Поиск по названию без учёта регистра; сортировка по дате создания по убыванию, затем UUID по возрастанию.
+- `GET /api/v1/admin/ornaments/{uuid}` возвращает игрушку.
+- `POST /api/v1/admin/ornaments` принимает `{name, isActive?}` и возвращает `201`. `name` — от 1 до 150 символов. Новая игрушка создаётся неактивной; `isActive=true` до загрузки изображения отклоняется.
+- `PATCH /api/v1/admin/ornaments/{uuid}` принимает непустое подмножество `{name, isActive}` и возвращает обновлённую игрушку. Включить игрушку без изображения нельзя.
+- `DELETE /api/v1/admin/ornaments/{uuid}` деактивирует игрушку с ответом `204`. Запись и файл сохраняются для ранее выданных наград.
+- `POST /api/v1/admin/ornaments/{uuid}/image` принимает `multipart/form-data` с единственным файлом `image` и возвращает обновлённую игрушку. Допустимы SVG, PNG и WebP до 5 МБ. Растровые файлы проверяются по содержимому (до 8 мегапикселей) и перекодируются; SVG разбирается как XML и допускает только простые фигуры, контуры и безопасные атрибуты. Файлы хранятся в постоянном `/uploads/ornaments`, URL имеет вид `/uploads/ornaments/{random-name}.{svg|png|webp}`. Старые URL сохраняются при замене изображения.
+
+DTO: `{uuid, name, imageUrl, isActive, createdAt, updatedAt}`. `imageUrl` равен `null` до загрузки. Активная игрушка всегда имеет изображение; это подкреплено ограничением БД. Отсутствующая игрушка — `404 ORNAMENT_NOT_FOUND`, неверные поля или изображение — `422 VALIDATION_ERROR`. Frontend использует одноимённые same-origin обработчики `/api/admin/ornaments`, `/api/admin/ornaments/{uuid}` и `/api/admin/ornaments/{uuid}/image`, а публичные `/uploads/ornaments/*` проксирует без bearer token. Для создания frontend сначала сохраняет неактивную запись, затем загружает файл и активирует её. Если загрузка не удалась, запись остаётся неактивной и загрузку можно повторить.

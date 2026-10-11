@@ -16,4 +16,8 @@ services:
     App\Task\Storage\LocalImageStorage:
         arguments:
             $uploadsDir: '%uploads_dir%'
+    App\Ornament\Storage\OrnamentImageStorage: '@App\Ornament\Storage\LocalOrnamentImageStorage'
+    App\Ornament\Storage\LocalOrnamentImageStorage:
+        arguments:
+            $uploadsDir: '%uploads_dir%'
 
