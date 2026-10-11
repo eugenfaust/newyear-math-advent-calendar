@@ -12,3 +12,8 @@ services:
         exclude:
             - '../src/Kernel.php'
 
+    App\Task\Storage\ImageStorage: '@App\Task\Storage\LocalImageStorage'
+    App\Task\Storage\LocalImageStorage:
+        arguments:
+            $uploadsDir: '%uploads_dir%'
+

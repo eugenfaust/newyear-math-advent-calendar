@@ -38,3 +38,15 @@
 - `DELETE /api/v1/admin/users/{uuid}` деактивирует пользователя и возвращает HTTP 204. Запись и история сохраняются.
 
 `role` — `ROLE_USER` или `ROLE_ADMIN`, `isActive` — boolean. Логин содержит 1–100 латинских букв, цифр, `_`, `.` или `-` и уникален среди всех пользователей, включая отключённых. Имя — 1–150 символов, пароль — 6–1024 символа. `email` может быть `null`. Ошибки полей — `422 VALIDATION_ERROR` с `details`; занятый логин — `409 LOGIN_TAKEN`; отсутствующий пользователь — `404 USER_NOT_FOUND`.
+
+## Библиотека заданий
+
+Все маршруты `/api/v1/admin/tasks` требуют актуальную роль `ROLE_ADMIN`. Ответы JSON не кешируются.
+
+- `GET /api/v1/admin/tasks?page=1&perPage=20&search=...&isActive=true&answerType=NONE` возвращает стандартный список. Поиск ведётся по заголовку и Markdown-тексту без учёта регистра; фильтры можно опускать. Сортировка: дата создания по убыванию, UUID по возрастанию.
+- `GET /api/v1/admin/tasks/{uuid}` возвращает задание.
+- `POST /api/v1/admin/tasks` принимает `{title, content, answerType?, correctAnswer?, solution?, isActive?}`. `title` — 1–150 символов, `content` — непустой Markdown до 50000 символов. `answerType` можно опустить или задать `NONE`; прочие значения отклоняются в MVP. `correctAnswer` и `solution` можно хранить как nullable текст, автоматическая проверка не выполняется.
+- `PATCH /api/v1/admin/tasks/{uuid}` принимает непустое подмножество тех же полей; `DELETE` деактивирует задание без удаления записи.
+- `POST /api/v1/admin/tasks/{uuid}/image` принимает `multipart/form-data` с одним файлом `image`. Допустимы PNG, JPEG и WebP до 5 МБ и 8 мегапикселей. Сервер проверяет MIME, декодирует и перекодирует файл, сохраняет его в постоянном `/uploads/tasks`. Ответ — обновлённое задание с `imageUrl` вида `/uploads/tasks/{random-name}.png`. `DELETE` по тому же пути удаляет изображение из задания.
+
+Административный DTO содержит `correctAnswer` и `solution`. Пользовательский DTO задания должен формироваться через `Task::toUserArray()` и не содержит `correctAnswer` до выполнения. Отсутствующее задание — `404 TASK_NOT_FOUND`, неверные поля или изображение — `422 VALIDATION_ERROR`. На frontend публичные URL `/uploads/tasks/*` проксируются к backend без передачи bearer token.
