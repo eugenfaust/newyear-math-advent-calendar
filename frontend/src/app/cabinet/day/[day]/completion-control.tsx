@@ -3,6 +3,7 @@
 import type { CalendarDayCompletion } from "@/lib/calendar";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
+import { motion, useReducedMotion } from "motion/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -45,9 +46,12 @@ export function CompletionControl({ day, year, completed }: { day: number; year:
   const queryClient = useQueryClient();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [reward, setReward] = useState<CalendarDayCompletion["reward"] | null>(null);
+  const [imageFailed, setImageFailed] = useState(false);
+  const reducedMotion = useReducedMotion();
   const mutation = useMutation({
     mutationFn: () => completeDay(day, year),
     onSuccess: (result) => {
+      setImageFailed(false);
       setReward(result.reward);
       void queryClient.invalidateQueries({ queryKey: ["calendar"] });
       void queryClient.invalidateQueries({ queryKey: ["calendar-day", year, day] });
@@ -71,10 +75,10 @@ export function CompletionControl({ day, year, completed }: { day: number; year:
       {reward && <div className={styles.rewardCard}>
         <p className={styles.eyebrow}>День {day} завершён</p>
         <h2 id="reward-title">Игрушка для вашей ёлки</h2>
-        <div className={styles.rewardDisplay}>
+        <motion.div className={styles.rewardDisplay} initial={reducedMotion ? false : { scale: 0.4, rotate: -15, opacity: 0 }} animate={{ scale: 1, rotate: 0, opacity: 1 }} transition={{ type: "spring", stiffness: 230, damping: 19 }}>
           <span className={styles.rewardThread} aria-hidden="true" />
-          <Image src={reward.imageUrl} alt={reward.name} width={160} height={160} unoptimized />
-        </div>
+          {imageFailed ? <span className={styles.rewardFallback} role="img" aria-label="Изображение игрушки недоступно">✦</span> : <Image src={reward.imageUrl} alt={reward.name} width={160} height={160} unoptimized onError={() => setImageFailed(true)} />}
+        </motion.div>
         <p className={styles.rewardName}>{reward.name}</p>
         <div className={styles.rewardActions}>
           <Link href="/cabinet/tree" className={styles.completeButton}>Перейти к ёлке</Link>

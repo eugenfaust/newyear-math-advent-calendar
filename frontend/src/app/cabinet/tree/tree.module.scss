@@ -5,10 +5,24 @@
 .lede { max-width: 590px; margin: 13px 0 0; color: #526178; line-height: 1.55; }
 .calendarLink { flex: none; margin-top: 6px; color: #3657a7; font-weight: 700; text-underline-offset: 4px; }
 .layout { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(260px, .8fr); align-items: start; gap: 20px; }
+.finish { display: flex; align-items: center; gap: 15px; margin: 0 0 20px; padding: 15px 20px; border: 1px solid #e7c978; border-radius: 14px; background: #fff8df; color: #514322; }
+.finishIcon { flex: none; color: #d39832; font-size: 2rem; }
+.finish strong { font-size: 1.05rem; }
+.finish p { margin: 3px 0 0; font-size: .88rem; line-height: 1.45; }
 .treePanel { min-width: 0; overflow: hidden; border: 1px solid #c9dbe8; border-radius: 16px; background: #e6f0f2; }
 .treeTopline { display: flex; justify-content: space-between; gap: 12px; padding: 15px 20px; border-bottom: 1px solid #c9dbe8; color: #305869; font-size: .76rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
 .canvas { position: relative; overflow: hidden; padding: 10px 10px 0; background: radial-gradient(circle at 50% 20%, #f8fbf7 0, #e8f2ef 35%, #d8e9ed 100%); }
 .canvas::before { position: absolute; inset: 0; pointer-events: none; content: ""; opacity: .35; background-image: linear-gradient(#a3c3ca 1px, transparent 1px), linear-gradient(90deg, #a3c3ca 1px, transparent 1px); background-size: 34px 34px; mask-image: linear-gradient(to bottom, #000, transparent 85%); }
+.snow { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.snow span { position: absolute; top: -12px; width: 5px; height: 5px; border-radius: 50%; background: #fff; box-shadow: 0 0 5px #fff; opacity: .7; animation: snowfall 14s linear infinite; }
+@keyframes snowfall { to { transform: translate(24px, 720px); opacity: .15; } }
+.light { opacity: .65; }
+.light0 { animation: glimmer 5s ease-in-out infinite alternate; }
+.light1 { animation: glimmer 6s ease-in-out -2s infinite alternate; }
+.light2 { animation: glimmer 7s ease-in-out -4s infinite alternate; }
+@keyframes glimmer { to { opacity: .22; } }
+.starBurst { transform-origin: 220px 58px; animation: star-burst 1.4s ease-out both; pointer-events: none; }
+@keyframes star-burst { 0% { opacity: 0; transform: scale(.45) rotate(-20deg); } 35% { opacity: 1; } 100% { opacity: 0; transform: scale(1.35) rotate(25deg); } }
 .treeSvg { position: relative; display: block; width: min(100%, 530px); height: auto; margin: 0 auto; overflow: visible; }
 .treeHint { margin: 0; padding: 14px 20px 17px; border-top: 1px solid #c9dbe8; color: #305869; font-size: .86rem; line-height: 1.5; }
 .slot { cursor: pointer; outline: none; }
@@ -16,6 +30,9 @@
 .hitArea { fill: transparent; }
 .emptySlot { fill: #edf5f3; fill-opacity: .15; stroke: #d8ece5; stroke-width: 1.5; stroke-dasharray: 3 4; }
 .slotNumber { fill: #e9f5ed; font-size: 12px; font-weight: 800; pointer-events: none; }
+.imageFallback { fill: #b28646; font-size: 24px; pointer-events: none; }
+.flyingOrnament { position: fixed; z-index: 30; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: #eff7f6; box-shadow: 0 5px 18px #153e5970; pointer-events: none; }
+.flyingOrnament img { width: 40px; height: 40px; object-fit: contain; }
 .target .emptySlot { fill: #f8cb73; fill-opacity: .96; stroke: #fff2c9; stroke-width: 3; stroke-dasharray: none; }
 .target .slotNumber { fill: #173d53; }
 .selectedSlot .slotFocus { stroke: #ffe3a3; }
@@ -37,6 +54,7 @@
 .selectedOrnament { border-color: #4561ad; background: #eaf1fb; box-shadow: inset 0 0 0 1px #4561ad; }
 .ornamentImage { display: grid; flex: none; place-items: center; width: 52px; height: 52px; border-radius: 8px; background: #e8f2ef; }
 .ornamentImage img { max-width: 48px; max-height: 48px; object-fit: contain; }
+.inventoryFallback { color: #b28646; font-size: 1.7rem; }
 .ornamentText { min-width: 0; flex: 1; }
 .ornamentText strong, .ornamentText small { display: block; }
 .ornamentText strong { overflow-wrap: anywhere; font-size: .9rem; line-height: 1.3; }
@@ -47,4 +65,4 @@
 .calendarLink:focus-visible, .ornamentButton:focus-visible, .error button:focus-visible { outline: 3px solid #4561ad; outline-offset: 3px; }
 @media (max-width: 800px) { .layout { grid-template-columns: 1fr; } .inventory { padding: 20px; } .ornamentList { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 520px) { .header { flex-direction: column; gap: 12px; } .layout { gap: 14px; } .treeTopline { padding: 12px; font-size: .66rem; } .canvas { padding: 0; } .treeHint { padding: 12px 15px; } .inventory { padding: 17px; } .ornamentList { grid-template-columns: 1fr; } }
-@media (prefers-reduced-motion: reduce) { .ornamentButton { transition: none; } .ornamentButton:hover:not(:disabled) { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .ornamentButton { transition: none; } .ornamentButton:hover:not(:disabled) { transform: none; } .snow span, .light, .starBurst { animation: none; } }

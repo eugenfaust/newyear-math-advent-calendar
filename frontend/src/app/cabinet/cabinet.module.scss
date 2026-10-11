@@ -53,6 +53,7 @@
 .rewardDisplay { position: relative; display: flex; align-items: center; justify-content: center; width: 200px; height: 190px; margin: 22px auto 0; border-radius: 100px 100px 14px 14px; background: radial-gradient(circle at 50% 62%, #f8fbff 0, #e8f0fb 65%, #dce9f8 100%); }
 .rewardThread { position: absolute; top: 0; left: 50%; width: 1px; height: 24px; background: #7390b9; }
 .rewardDisplay img { width: 160px; height: 160px; margin-top: 20px; object-fit: contain; filter: drop-shadow(0 8px 8px #24446733); }
+.rewardFallback { margin-top: 20px; color: #b28646; font-size: 7rem; line-height: 1; }
 .rewardName { margin: 10px 0 24px; font-size: 1.1rem; font-weight: 750; }
 .rewardActions { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; }
 .rewardClose { min-height: 46px; padding: 10px 14px; border: 1px solid #a7b9db; border-radius: 9px; background: transparent; color: #27488b; font: inherit; font-weight: 700; cursor: pointer; }

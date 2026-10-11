@@ -5,10 +5,14 @@ import { TREE_SLOTS } from "@/lib/tree-slots";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
+import { motion, useReducedMotion } from "motion/react";
 import { useState } from "react";
 import styles from "./tree.module.scss";
 
 type ResponseError = { code: string; message: string };
+type Flight = { uuid: string; imageUrl: string; from: { x: number; y: number }; to: { x: number; y: number } };
+const SNOW = [14, 27, 39, 53, 66, 78, 88, 95];
+const LIGHTS = [[150, 194], [221, 203], [284, 193], [128, 317], [220, 337], [316, 312], [101, 446], [180, 464], [266, 467], [349, 444], [77, 570], [166, 598], [267, 599], [364, 567]];
 
 function isResponseError(value: unknown): value is ResponseError {
   return typeof value === "object" && value !== null && "code" in value && typeof value.code === "string" && "message" in value && typeof value.message === "string";
@@ -55,6 +59,10 @@ export function TreeExperience({ initialTree }: { initialTree: UserTree }) {
   });
   const [selectedUuid, setSelectedUuid] = useState<string | null>(null);
   const [announcement, setAnnouncement] = useState("");
+  const [flight, setFlight] = useState<Flight | null>(null);
+  const [recentUuid, setRecentUuid] = useState<string | null>(null);
+  const [failedImages, setFailedImages] = useState<string[]>([]);
+  const reducedMotion = useReducedMotion();
   const selected = tree.ornaments.find((ornament) => ornament.uuid === selectedUuid) ?? null;
   const placed = tree.ornaments.filter((ornament) => ornament.treeSlot !== null);
   const unplaced = tree.ornaments.filter((ornament) => ornament.treeSlot === null);
@@ -63,6 +71,11 @@ export function TreeExperience({ initialTree }: { initialTree: UserTree }) {
   const mutation = useMutation({
     mutationFn: ({ ornament, slot }: { ornament: TreeOrnament; slot: number }) => placeOrnament(ornament.uuid, slot, tree.year),
     onSuccess: async (updated) => {
+      if (!reducedMotion && updated.treeSlot !== null) {
+        const source = document.querySelector(`[data-ornament="${updated.uuid}"]`)?.getBoundingClientRect();
+        const target = document.querySelector(`[data-slot="${updated.treeSlot}"]`)?.getBoundingClientRect();
+        if (source && target) setFlight({ uuid: updated.uuid, imageUrl: updated.imageUrl, from: { x: source.left + source.width / 2, y: source.top + source.height / 2 }, to: { x: target.left + target.width / 2, y: target.top + target.height / 2 } });
+      }
       queryClient.setQueryData<UserTree>(queryKey, (previous) => previous ? {
         ...previous,
         ornaments: previous.ornaments.map((ornament) => ornament.uuid === updated.uuid ? updated : ornament),
@@ -97,16 +110,22 @@ export function TreeExperience({ initialTree }: { initialTree: UserTree }) {
     mutation.mutate({ ornament: selected, slot });
   }
 
+  function markImageFailed(uuid: string) {
+    setFailedImages((previous) => previous.includes(uuid) ? previous : [...previous, uuid]);
+  }
+
   return <section className={styles.page} aria-labelledby="tree-title">
     <header className={styles.header}>
       <div><p className={styles.eyebrow}>Математический декабрь · {tree.year}</p><h1 id="tree-title">Моя ёлка</h1><p className={styles.lede}>Каждая решённая задача оставляет на ёлке свой знак. Выберите игрушку и найдите ей место.</p></div>
       <Link href="/cabinet" className={styles.calendarLink}>← К календарю</Link>
     </header>
 
+    {tree.completed && <div className={styles.finish} role="status"><span className={styles.finishIcon} aria-hidden="true">✦</span><div><strong>Все 31 задачи решены!</strong><p>Звезда зажглась. Ваши игрушки по-прежнему можно размещать и перемещать.</p></div></div>}
     <div className={styles.layout}>
       <div className={styles.treePanel}>
         <div className={styles.treeTopline}><span>Ёлка · {placed.length} из 31 мест</span><span>{tree.completedDays} из {tree.totalDays} задач</span></div>
         <div className={styles.canvas}>
+          <div className={styles.snow} aria-hidden="true">{SNOW.map((left, index) => <span key={left} style={{ left: `${left}%`, animationDelay: `${-index * 1.7}s` }} />)}</div>
           <svg className={styles.treeSvg} viewBox="0 0 440 710" role="group" aria-label="Ёлка с 31 местом для игрушек">
             <defs>
               <linearGradient id="fir" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#307b77" /><stop offset=".52" stopColor="#165d68" /><stop offset="1" stopColor="#103e59" /></linearGradient>
@@ -118,15 +137,17 @@ export function TreeExperience({ initialTree }: { initialTree: UserTree }) {
             <path d="M220 58 294 198h-28l69 117h-31l69 123h-35l58 209" fill="none" stroke="#092e49" strokeOpacity=".75" strokeWidth="3" />
             <path d="M157 189q63 37 126 0M114 310q106 65 212 0M78 432q142 86 284 0M52 556q168 94 336 0" fill="none" stroke="url(#branch)" strokeWidth="13" strokeLinecap="round" />
             <path d="M150 194q70 23 140-2M111 315q109 42 218-2M72 440q148 53 296-2M50 566q170 60 340-2" fill="none" stroke="#b8ded3" strokeOpacity=".62" strokeWidth="2" strokeDasharray="3 8" strokeLinecap="round" />
-            <path d="m220 33 8 17 19 3-14 13 3 19-16-9-16 9 3-19-14-13 19-3Z" fill={tree.completed ? "#f8cb73" : "#b8cbd3"} stroke={tree.completed ? "#ffe3a3" : "#d8e4e8"} strokeWidth="2" />
+            {LIGHTS.map(([x, y], index) => <circle key={index} className={`${styles.light} ${styles[`light${index % 3}`]}`} cx={x} cy={y} r="3.2" fill={index % 2 ? "#f8cb73" : "#eff9e7"} />)}
+            <motion.path d="m220 33 8 17 19 3-14 13 3 19-16-9-16 9 3-19-14-13 19-3Z" fill={tree.completed ? "#f8cb73" : "#b8cbd3"} stroke={tree.completed ? "#ffe3a3" : "#d8e4e8"} strokeWidth="2" style={{ transformOrigin: "220px 58px" }} initial={tree.completed && !reducedMotion ? { scale: 0.45, opacity: 0, rotate: -25 } : false} animate={{ scale: 1, opacity: 1, rotate: 0 }} transition={{ type: "spring", stiffness: 180, damping: 14 }} />
+            {tree.completed && <g className={styles.starBurst} aria-hidden="true">{[0, 45, 90, 135, 180, 225, 270, 315].map((angle) => <path key={angle} d="M220 14v-9" stroke="#f8cb73" strokeWidth="2" strokeLinecap="round" transform={`rotate(${angle} 220 58)`} />)}</g>}
             {TREE_SLOTS.map((slot) => {
               const ornament = occupied.get(slot.id);
               const isSelected = ornament?.uuid === selectedUuid;
               const isTarget = Boolean(selected && !ornament);
               const label = ornament ? `Место ${slot.id}: ${ornament.name}. Нажмите, чтобы ${isSelected ? "снять выбор" : "выбрать для перемещения"}.` : selected ? `Свободное место ${slot.id}. Разместить ${selected.name}.` : `Свободное место ${slot.id}. Сначала выберите игрушку.`;
-              return <g key={slot.id} role="button" tabIndex={0} aria-label={label} aria-pressed={Boolean(isSelected)} aria-disabled={mutation.isPending} className={`${styles.slot} ${ornament ? styles.occupied : ""} ${isTarget ? styles.target : ""} ${isSelected ? styles.selectedSlot : ""}`} onClick={() => activateSlot(slot.id)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); activateSlot(slot.id); } }}>
+              return <g key={slot.id} data-slot={slot.id} role="button" tabIndex={0} aria-label={label} aria-pressed={Boolean(isSelected)} aria-disabled={mutation.isPending} className={`${styles.slot} ${ornament ? styles.occupied : ""} ${isTarget ? styles.target : ""} ${isSelected ? styles.selectedSlot : ""}`} onClick={() => activateSlot(slot.id)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); activateSlot(slot.id); } }}>
                 <circle className={styles.slotFocus} cx={slot.x} cy={slot.y} r="29" />
-                {ornament ? <><circle cx={slot.x} cy={slot.y} r="21" fill="#eff7f6" stroke="#f5d898" strokeWidth="2" /><image href={ornament.imageUrl} x={slot.x - 19} y={slot.y - 19} width="38" height="38" preserveAspectRatio="xMidYMid meet" /></> : <><circle className={styles.emptySlot} cx={slot.x} cy={slot.y} r="18" /><text className={styles.slotNumber} x={slot.x} y={slot.y + 4} textAnchor="middle">{slot.id}</text></>}
+                {ornament ? <motion.g style={{ transformOrigin: `${slot.x}px ${slot.y}px`, opacity: flight?.uuid === ornament.uuid ? 0 : 1 }} initial={false} animate={recentUuid === ornament.uuid && !reducedMotion ? { rotate: [0, 7, -4, 0] } : { rotate: 0 }} transition={{ duration: .7 }} onAnimationComplete={() => { if (recentUuid === ornament.uuid) setRecentUuid(null); }}><circle cx={slot.x} cy={slot.y} r="21" fill="#eff7f6" stroke="#f5d898" strokeWidth="2" />{failedImages.includes(ornament.uuid) ? <text className={styles.imageFallback} x={slot.x} y={slot.y + 7} textAnchor="middle">✦</text> : <image href={ornament.imageUrl} x={slot.x - 19} y={slot.y - 19} width="38" height="38" preserveAspectRatio="xMidYMid meet" onError={() => markImageFailed(ornament.uuid)} />}</motion.g> : <><circle className={styles.emptySlot} cx={slot.x} cy={slot.y} r="18" /><text className={styles.slotNumber} x={slot.x} y={slot.y + 4} textAnchor="middle">{slot.id}</text></>}
                 <circle className={styles.hitArea} cx={slot.x} cy={slot.y} r="29" />
               </g>;
             })}
@@ -142,16 +163,18 @@ export function TreeExperience({ initialTree }: { initialTree: UserTree }) {
         {isError && <div className={styles.error} role="alert">Не удалось обновить ёлку. <button type="button" onClick={() => void refetch()}>Повторить</button></div>}
         {isFetching && <p className={styles.syncing} role="status">Обновляем ёлку…</p>}
         <h3>Ждут своего места <span>{unplaced.length}</span></h3>
-        {unplaced.length ? <div className={styles.ornamentList}>{unplaced.map((ornament) => <OrnamentButton key={ornament.uuid} ornament={ornament} selected={selectedUuid === ornament.uuid} disabled={mutation.isPending} onClick={() => chooseOrnament(ornament)} />)}</div> : <p className={styles.empty}>Здесь появятся награды за решённые задания. Новую игрушку можно получить в <Link href="/cabinet">календаре</Link>.</p>}
+        {unplaced.length ? <div className={styles.ornamentList}>{unplaced.map((ornament) => <OrnamentButton key={ornament.uuid} ornament={ornament} selected={selectedUuid === ornament.uuid} disabled={mutation.isPending} onClick={() => chooseOrnament(ornament)} />)}</div> : <p className={styles.empty}>{placed.length ? "Все полученные игрушки уже висят на ёлке. Выберите любую, чтобы переместить." : <>Здесь появятся награды за решённые задания. Новую игрушку можно получить в <Link href="/cabinet">календаре</Link>.</>}</p>}
         {placed.length > 0 && <><h3>На ёлке <span>{placed.length}</span></h3><div className={styles.ornamentList}>{placed.map((ornament) => <OrnamentButton key={ornament.uuid} ornament={ornament} selected={selectedUuid === ornament.uuid} disabled={mutation.isPending} onClick={() => chooseOrnament(ornament)} />)}</div></>}
       </aside>
     </div>
+    {flight && <motion.div className={styles.flyingOrnament} initial={{ left: flight.from.x - 22, top: flight.from.y - 22, scale: .75, opacity: .8 }} animate={{ left: flight.to.x - 22, top: flight.to.y - 22, scale: 1, opacity: 1 }} transition={{ duration: .55, ease: [0.22, 1, 0.36, 1] }} onAnimationComplete={() => { setRecentUuid(flight.uuid); setFlight(null); }} aria-hidden="true">{failedImages.includes(flight.uuid) ? <span className={styles.inventoryFallback}>✦</span> : <Image src={flight.imageUrl} alt="" width={44} height={44} unoptimized onError={() => markImageFailed(flight.uuid)} />}</motion.div>}
   </section>;
 }
 
 function OrnamentButton({ ornament, selected, disabled, onClick }: { ornament: TreeOrnament; selected: boolean; disabled: boolean; onClick: () => void }) {
-  return <button type="button" className={`${styles.ornamentButton} ${selected ? styles.selectedOrnament : ""}`} aria-pressed={selected} disabled={disabled} onClick={onClick}>
-    <span className={styles.ornamentImage}><Image src={ornament.imageUrl} alt="" width={48} height={48} unoptimized /></span>
+  const [imageFailed, setImageFailed] = useState(false);
+  return <button type="button" data-ornament={ornament.uuid} className={`${styles.ornamentButton} ${selected ? styles.selectedOrnament : ""}`} aria-pressed={selected} disabled={disabled} onClick={onClick}>
+    <span className={styles.ornamentImage}>{imageFailed ? <span className={styles.inventoryFallback} aria-hidden="true">✦</span> : <Image src={ornament.imageUrl} alt="" width={48} height={48} unoptimized onError={() => setImageFailed(true)} />}</span>
     <span className={styles.ornamentText}><strong>{ornament.name}</strong><small>{ornament.treeSlot === null ? "Выбрать место" : `Место ${ornament.treeSlot} · переместить`}</small></span>
     <span className={styles.ornamentArrow} aria-hidden="true">{selected ? "✓" : "↗"}</span>
   </button>;
