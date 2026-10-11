@@ -13,6 +13,9 @@ services:
             - '../src/Kernel.php'
 
     App\Task\Storage\ImageStorage: '@App\Task\Storage\LocalImageStorage'
+    App\Calendar\Service\CalendarAvailability:
+        arguments:
+            $businessTimezone: '%app.timezone%'
     App\Task\Storage\LocalImageStorage:
         arguments:
             $uploadsDir: '%uploads_dir%'

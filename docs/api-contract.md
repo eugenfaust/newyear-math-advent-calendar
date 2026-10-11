@@ -15,6 +15,10 @@
 
 `GET /api/v1/calendar` выбирает календарь текущего года **по `APP_TIMEZONE=Europe/Moscow` на сервере**. Для MVP действует `UNIQUE(user_id, year)`. Если календарь на этот год не назначен, ответ `404 ADVENT_CALENDAR_NOT_FOUND`, без автоматического выбора прошлогоднего. `GET /api/v1/calendar?year=YYYY` выбирает конкретный год и позволяет посмотреть историю; проверка владельца обязательна. Доступность дня рассчитывается сервером в той же бизнес-зоне; изменение часов браузера ничего не открывает. После 31 декабря незавершённые дни назначенного календаря остаются доступны.
 
+`GET /api/v1/calendar` возвращает `{uuid, year, startedAt, completedDays, availableDays, totalDays: 31, days}`. `days` содержит 31 запись по возрастанию номера: `{day, status, availableOn, openedAt, completedAt}`. Статусы: `locked`, `available`, `completed`; `availableOn` — дата открытия в бизнес-зоне (`YYYY-MM-DD`). `availableDays` считает все открытые по дате дни, включая завершённые; `completedDays` — завершённые. Временные поля — UTC либо `null`. Список не содержит текстов заданий.
+
+`GET /api/v1/calendar/days/{day}` принимает `day` от 1 до 31 и необязательный `?year=YYYY` по тому же правилу. Доступный день возвращает `{day, year, status, availableOn, openedAt, completedAt, task}`, где `task` — пользовательский DTO `{uuid, title, content, imageUrl, answerType}` без `correctAnswer` и `solution`. Первое успешное чтение ставит `openedAt` и `startedAt` один раз. Закрытый день возвращает `403 ADVENT_DAY_LOCKED` без задания; некорректный день или год — `422 VALIDATION_ERROR`. Все ответы имеют `Cache-Control: no-store`. Frontend читает через same-origin `/api/calendar` и `/api/calendar/days/{day}`; bearer token остаётся на сервере Next.js.
+
 ## Аутентификация и граница доверия
 
 Реализация входа и модели User запланирована задачей 02, клиентской оболочки — задачей 03. Их общий контракт:

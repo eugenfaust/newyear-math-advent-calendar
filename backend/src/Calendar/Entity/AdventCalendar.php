@@ -59,8 +59,8 @@ class AdventCalendar
     public function getStartedAt(): ?\DateTimeImmutable { return $this->startedAt; }
     public function getCreatedAt(): \DateTimeImmutable { return $this->createdAt; }
     public function getUpdatedAt(): \DateTimeImmutable { return $this->updatedAt; }
-    public function start(): void
+    public function start(?\DateTimeImmutable $now = null): void
     {
-        if ($this->startedAt === null) $this->startedAt = $this->updatedAt = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
+        if ($this->startedAt === null) $this->startedAt = $this->updatedAt = $now ?? new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
     }
 }

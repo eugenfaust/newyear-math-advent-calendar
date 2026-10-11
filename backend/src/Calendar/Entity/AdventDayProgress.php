@@ -57,4 +57,8 @@ class AdventDayProgress
     public function getCompletedAt(): ?\DateTimeImmutable { return $this->completedAt; }
     public function getCreatedAt(): \DateTimeImmutable { return $this->createdAt; }
     public function getUpdatedAt(): \DateTimeImmutable { return $this->updatedAt; }
+    public function open(\DateTimeImmutable $now): void
+    {
+        if ($this->openedAt === null) $this->openedAt = $this->updatedAt = $now;
+    }
 }
