@@ -1,0 +1,13 @@
+.task { color: #17243b; overflow-wrap: anywhere; }
+.task h2 { margin: 0 0 20px; font-size: clamp(1.4rem, 2.5vw, 2rem); line-height: 1.2; letter-spacing: -.025em; }
+.image { margin: 0 0 24px; border: 1px solid #d6e0f2; border-radius: 10px; overflow: hidden; background: #f7f9fc; }
+.image img { display: block; width: 100%; height: auto; max-height: 420px; object-fit: contain; }
+.markdown { line-height: 1.7; font-size: 1rem; }
+.markdown > :first-child { margin-top: 0; }
+.markdown > :last-child { margin-bottom: 0; }
+.markdown :global(.katex-display) { overflow-x: auto; overflow-y: hidden; padding: .3em 0; }
+.markdown pre { overflow-x: auto; padding: 14px; background: #f1f5fb; border-radius: 7px; }
+.markdown code { font-size: .9em; }
+.markdown a { color: #3657a7; text-decoration: underline; }
+.markdown blockquote { margin-left: 0; padding-left: 18px; border-left: 3px solid #4561ad; }
+.markdown img { max-width: 100%; height: auto; }
