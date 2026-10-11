@@ -31,6 +31,8 @@
 .emptySlot { fill: #edf5f3; fill-opacity: .15; stroke: #d8ece5; stroke-width: 1.5; stroke-dasharray: 3 4; }
 .slotNumber { fill: #e9f5ed; font-size: 12px; font-weight: 800; pointer-events: none; }
 .imageFallback { fill: #b28646; font-size: 24px; pointer-events: none; }
+.recentOrnament image { transform-box: fill-box; transform-origin: center; animation: ornament-settle .7s ease-out; }
+@keyframes ornament-settle { 30% { transform: rotate(7deg); } 60% { transform: rotate(-4deg); } }
 .flyingOrnament { position: fixed; z-index: 30; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: #eff7f6; box-shadow: 0 5px 18px #153e5970; pointer-events: none; }
 .flyingOrnament img { width: 40px; height: 40px; object-fit: contain; }
 .target .emptySlot { fill: #f8cb73; fill-opacity: .96; stroke: #fff2c9; stroke-width: 3; stroke-dasharray: none; }
@@ -65,4 +67,4 @@
 .calendarLink:focus-visible, .ornamentButton:focus-visible, .error button:focus-visible { outline: 3px solid var(--winter-red); outline-offset: 3px; }
 @media (max-width: 800px) { .layout { grid-template-columns: 1fr; } .inventory { padding: 20px; } .ornamentList { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 520px) { .header { flex-direction: column; gap: 12px; } .layout { gap: 14px; } .treeTopline { padding: 12px; font-size: .66rem; } .canvas { padding: 0; } .treeHint { padding: 12px 15px; } .inventory { padding: 17px; } .ornamentList { grid-template-columns: 1fr; } }
-@media (prefers-reduced-motion: reduce) { .ornamentButton { transition: none; } .ornamentButton:hover:not(:disabled) { transform: none; } .snow span, .light, .starBurst { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .ornamentButton { transition: none; } .ornamentButton:hover:not(:disabled) { transform: none; } .snow span, .light, .starBurst, .recentOrnament image { animation: none; } }
