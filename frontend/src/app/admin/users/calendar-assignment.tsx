@@ -6,6 +6,7 @@ import { useState } from "react";
 import { readTemplateResponse, type TemplateList } from "../templates/types";
 import { readResponse, type ApiProblem, type AssignedCalendar, type AssignedCalendarList } from "./types";
 import styles from "./users.module.scss";
+import { CalendarProgress } from "./calendar-progress";
 
 export function CalendarAssignment({ uuid }: { uuid: string }) {
   const queryClient = useQueryClient();
@@ -13,6 +14,7 @@ export function CalendarAssignment({ uuid }: { uuid: string }) {
   const [templateUuid, setTemplateUuid] = useState("");
   const [templatePage, setTemplatePage] = useState(1);
   const [calendarPage, setCalendarPage] = useState(1);
+  const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -41,6 +43,7 @@ export function CalendarAssignment({ uuid }: { uuid: string }) {
       setNotice(`Календарь на ${result.year} год назначен.`);
       setTemplateUuid("");
       setCalendarPage(1);
+      setSelectedYear(result.year);
       await queryClient.invalidateQueries({ queryKey: ["user-calendars", uuid] });
     } catch (problem) {
       const api = problem as ApiProblem;
@@ -51,7 +54,8 @@ export function CalendarAssignment({ uuid }: { uuid: string }) {
   return <section className={styles.calendarPanel} aria-labelledby="calendar-heading">
     <div className={styles.calendarHeading}><div><span className={styles.calendarEyebrow}>Декабрь по годам</span><h2 id="calendar-heading">Календари пользователя</h2></div><span className={styles.calendarCount}>31 день в каждом календаре</span></div>
     {calendars.isPending ? <p role="status">Загрузка календарей…</p> : calendars.isError ? <p role="alert" className={styles.error}>Не удалось загрузить календари. <button type="button" onClick={() => calendars.refetch()}>Повторить</button></p> : calendars.data?.items.length ? <>
-      <ul className={styles.calendarList}>{calendars.data.items.map((calendar) => <li key={calendar.uuid}><strong>{calendar.year}</strong><span>{calendar.template.name}</span><small>{calendar.startedAt ? "Начат" : "Ожидает начала"}</small></li>)}</ul>
+      <ul className={styles.calendarList}>{calendars.data.items.map((calendar) => <li key={calendar.uuid}><strong>{calendar.year}</strong><span>{calendar.template.name}</span><button type="button" className={styles.progressToggle} aria-expanded={selectedYear === calendar.year} onClick={() => setSelectedYear(selectedYear === calendar.year ? null : calendar.year)}>{selectedYear === calendar.year ? "Скрыть прогресс" : "Прогресс и ёлка"}</button></li>)}</ul>
+      {selectedYear !== null && <CalendarProgress key={selectedYear} uuid={uuid} year={selectedYear} />}
       {calendars.data.pagination.totalPages > 1 && <div className={styles.calendarPager}><Button label="Назад" type="button" variant="secondary" isDisabled={calendarPage <= 1} onClick={() => setCalendarPage(calendarPage - 1)} /><span>Страница {calendarPage} из {calendars.data.pagination.totalPages}</span><Button label="Далее" type="button" variant="secondary" isDisabled={calendarPage >= calendars.data.pagination.totalPages} onClick={() => setCalendarPage(calendarPage + 1)} /></div>}
     </> : <p>Календарей пока нет. Выберите год и готовый шаблон.</p>}
     <form className={styles.calendarForm} onSubmit={assign}>

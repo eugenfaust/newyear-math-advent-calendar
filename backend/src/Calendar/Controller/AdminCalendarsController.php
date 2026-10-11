@@ -7,6 +7,8 @@ namespace App\Calendar\Controller;
 use App\Calendar\Entity\AdventCalendar;
 use App\Calendar\Service\AssignAdventCalendarService;
 use App\Calendar\Service\CalendarAssignmentException;
+use App\Calendar\Service\UserCalendarService;
+use App\Ornament\Service\UserTreeService;
 use App\Template\Entity\AdventTemplate;
 use App\Template\Service\TemplateException;
 use App\User\Entity\User;
@@ -18,7 +20,22 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/api/v1/admin/users/{uuid}/calendars', requirements: ['uuid' => '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}'])]
 final class AdminCalendarsController
 {
-    public function __construct(private EntityManagerInterface $em, private AssignAdventCalendarService $assignment) {}
+    public function __construct(private EntityManagerInterface $em, private AssignAdventCalendarService $assignment, private UserCalendarService $calendars, private UserTreeService $trees) {}
+
+    #[Route('/{year}/progress', requirements: ['year' => '[1-9][0-9]{0,3}'], methods: ['GET'])]
+    public function progress(string $uuid, int $year): JsonResponse
+    {
+        $user = $this->em->find(User::class, $uuid);
+        if (!$user) return $this->error('USER_NOT_FOUND', 'User not found.', 404);
+        $calendar = $this->em->getRepository(AdventCalendar::class)->findOneBy(['user' => $user, 'year' => $year]);
+        if (!$calendar) return $this->error('ADVENT_CALENDAR_NOT_FOUND', 'Calendar not found.', 404);
+        $now = new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
+        return $this->response([
+            'calendar' => $this->serialize($calendar),
+            'progress' => $this->calendars->summary($user, $year, $now),
+            'tree' => $this->trees->summary($user, $year),
+        ]);
+    }
 
     #[Route('', methods: ['GET'])]
     public function list(string $uuid, Request $request): JsonResponse

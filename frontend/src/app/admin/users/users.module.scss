@@ -32,3 +32,26 @@
 .calendarPager { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 @media (max-width: 640px) { .heading, .search { flex-direction: column; align-items: stretch; } .table { min-width: 700px; } }
 @media (max-width: 640px) { .calendarPanel { padding: 18px; } .calendarHeading { align-items: flex-start; flex-direction: column; } .calendarForm { grid-template-columns: 1fr; } .calendarList li { grid-template-columns: 1fr; gap: 3px; } }
+.progressToggle { justify-self: end; border: 1px solid #9ba9ca; border-radius: 6px; padding: 8px 10px; color: #263b7e; background: #fff; font: inherit; cursor: pointer; }
+.progressToggle:hover { background: #edf2ff; }
+.progressToggle:focus-visible { outline: 3px solid #435a9b; outline-offset: 2px; }
+.progressPanel { display: grid; gap: 20px; padding: 22px; border: 1px solid #bac8df; border-radius: 12px; background: #fff; }
+.progressHeading, .adminTreeHeading { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
+.progressHeading h3 { margin: 4px 0 0; font-size: 1.35rem; }
+.progressHeading strong { color: #176267; font-size: 1.15rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.progressBody { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, .8fr); gap: 28px; }
+.progressCaption { margin: 0 0 12px !important; color: #435a9b; font-size: .78rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.progressDays { list-style: none; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; margin: 0; padding: 0; }
+.progressDays li { display: flex; align-items: center; justify-content: space-between; min-height: 38px; padding: 4px 6px; border-radius: 5px; font-variant-numeric: tabular-nums; }
+.progressDays small { font-weight: 700; }
+.locked { color: #63718a; background: #edf0f5; }
+.available { color: #765117; background: #fff0cb; }
+.completed { color: #fff; background: #176267; }
+.progressLegend { margin-top: 12px !important; color: #586781; font-size: .8rem; }
+.adminTree { min-width: 0; }
+.adminTreeHeading span { color: #586781; font-size: .8rem; }
+.adminTree svg { display: block; width: min(100%, 290px); max-height: 390px; margin: auto; border-radius: 10px; background: #eaf2f6; }
+.unplacedAdmin { display: grid; gap: 8px; margin-top: 14px; font-size: .85rem; }
+.unplacedAdmin ul { list-style: none; display: flex; flex-wrap: wrap; gap: 7px; margin: 0; padding: 0; }
+.unplacedAdmin li { display: flex; align-items: center; gap: 5px; padding: 4px 8px; border-radius: 6px; background: #f2f5f9; }
+@media (max-width: 640px) { .progressBody { grid-template-columns: 1fr; } .progressPanel { padding: 15px; } .progressHeading { align-items: flex-start; flex-direction: column; } .progressToggle { justify-self: start; } }

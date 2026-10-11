@@ -103,4 +103,6 @@ DTO: `{uuid, name, imageUrl, isActive, createdAt, updatedAt}`. `imageUrl` рав
 
 Создание календаря и всех 31 записей `AdventDayProgress` атомарно. Каждая запись сохраняет ссылку на выбранное для дня задание; изменение шаблона позднее не меняет эти ссылки. Сам текст задания остаётся общим. `UNIQUE(user_id, year)` и `UNIQUE(calendar_id, day)` закреплены в БД.
 
+`GET /api/v1/admin/users/{uuid}/calendars/{year}/progress` доступен только с актуальной ролью `ROLE_ADMIN`. Он возвращает `{calendar: AssignedCalendar, progress: UserCalendar, tree: UserTree}`: назначенный шаблон и год, 31 статус дня со счётчиком, а также выданные и размещённые игрушки. `UserCalendar` и `UserTree` имеют те же форматы, что пользовательские `GET /calendar` и `GET /tree`; статус доступности вычисляется backend на момент запроса. Задания и ответы в этом DTO отсутствуют. Ошибки: `404 USER_NOT_FOUND`, `404 ADVENT_CALENDAR_NOT_FOUND`, `422 VALIDATION_ERROR` для неверного года; ответ имеет `Cache-Control: no-store`. Frontend читает его через `GET /api/admin/users/{uuid}/calendars/{year}/progress`.
+
 Ошибки: `404 USER_NOT_FOUND` или `TEMPLATE_NOT_FOUND`; `409 CALENDAR_ALREADY_ASSIGNED` для повторного года, `TEMPLATE_INACTIVE` или `TEMPLATE_HAS_INACTIVE_TASK`; `422 TEMPLATE_INCOMPLETE` или `VALIDATION_ERROR` с `details`.

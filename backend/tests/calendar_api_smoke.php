@@ -35,6 +35,7 @@ try {
     $other = new User('calendar-other-'.bin2hex(random_bytes(5)), 'Other');
     $owner->setPasswordHash(password_hash('temporary', PASSWORD_BCRYPT));
     $other->setPasswordHash(password_hash('temporary', PASSWORD_BCRYPT));
+    $other->setRoles(['ROLE_ADMIN']);
     $template = new AdventTemplate('Calendar API smoke');
     $task = new Task('Safe title', 'Safe content');
     $task->setCorrectAnswer('private answer');
@@ -114,6 +115,21 @@ try {
     $foreignResponse = $requestDay($otherToken);
     check($foreignResponse->getStatusCode() === 404, 'Foreign calendar request did not return 404.');
     check(!str_contains((string) $foreignResponse->getContent(), 'Safe content'), 'Foreign request disclosed task content.');
+    $progressPath = '/api/v1/admin/users/'.$owner->getUuid().'/calendars/2026/progress';
+    $requestProgress = static function (string $path, string $token) use ($kernel): \Symfony\Component\HttpFoundation\Response {
+        $request = Request::create($path, 'GET', [], [], [], ['HTTP_AUTHORIZATION' => 'Bearer '.$token]);
+        $response = $kernel->handle($request);
+        $kernel->terminate($request, $response);
+        return $response;
+    };
+    check($requestProgress($progressPath, $ownerToken)->getStatusCode() === 403, 'Non-admin read administrative progress.');
+    $adminResponse = $requestProgress($progressPath, $otherToken);
+    $adminBody = json_decode((string) $adminResponse->getContent(), true, 512, JSON_THROW_ON_ERROR);
+    check($adminResponse->getStatusCode() === 200 && count($adminBody['progress']['days']) === 31 && $adminBody['tree']['ornaments'] === [], 'Admin progress response is incomplete.');
+    check(str_contains((string) $adminResponse->headers->get('Cache-Control'), 'no-store'), 'Admin progress was cacheable.');
+    check(!str_contains((string) $adminResponse->getContent(), 'Safe content'), 'Admin progress disclosed task content.');
+    $missing = $requestProgress('/api/v1/admin/users/'.$owner->getUuid().'/calendars/2027/progress', $otherToken);
+    check($missing->getStatusCode() === 404, 'Missing calendar progress was accessible.');
 } finally {
     $connection->rollBack();
     $kernel->shutdown();
