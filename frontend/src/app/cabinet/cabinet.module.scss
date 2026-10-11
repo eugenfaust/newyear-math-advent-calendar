@@ -6,7 +6,7 @@
 .treeLink { display: inline-flex; justify-content: space-between; align-items: center; gap: 22px; flex: none; margin-top: 4px; padding: 13px 16px; border: 1px solid #a7b9db; border-radius: 9px; color: #27488b; font-weight: 700; text-decoration: none; transition: background .2s, transform .2s; }
 .treeLink:hover { background: #eaf1fb; transform: translateY(-2px); }
 .treeLink span { font-size: 1.2rem; }
-.overview { display: grid; grid-template-columns: 1fr 1fr 1.6fr; align-items: flex-end; gap: 22px; padding: 24px 28px; border-radius: 13px; background: #eaf1fb; }
+.overview { display: grid; grid-template-columns: 1fr 1fr 1fr 1.6fr; align-items: flex-end; gap: 22px; padding: 24px 28px; border-radius: 13px; background: #eaf1fb; }
 .statNumber, .statLabel { display: block; }
 .statNumber { font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 750; letter-spacing: -.06em; line-height: 1; font-variant-numeric: tabular-nums; }
 .statNumber span { color: #6b7b98; font-size: .55em; font-weight: 500; }
@@ -65,7 +65,7 @@
 .treeLink:focus-visible, .day:focus-visible, .backLink:focus-visible, .retryButton:focus-visible, .completeButton:focus-visible, .rewardClose:focus-visible { outline: 3px solid #4561ad; outline-offset: 3px; }
 @media (max-width: 760px) {
   .intro { flex-direction: column; gap: 16px; }
-  .overview { grid-template-columns: 1fr 1fr; }
+  .overview { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .progressBlock { grid-column: 1 / -1; }
   .gridHeading { flex-direction: column; align-items: flex-start; }
   .day { min-height: 76px; padding: 9px; }
@@ -79,7 +79,7 @@
   .dayNumber { font-size: 1rem; }
   .dayState { font-size: .58rem; }
   .dayMark { display: none; }
-  .overview { padding: 18px; gap: 16px; }
+  .overview { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 18px; gap: 16px; }
   .spacer { min-width: 0; }
 }
 @media (prefers-reduced-motion: reduce) {

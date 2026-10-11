@@ -1,4 +1,5 @@
 import { getAccessToken } from "@/lib/auth-token";
+import { hasSameOrigin } from "@/lib/same-origin";
 import { NextRequest, NextResponse } from "next/server";
 
 export function taskError(code: string, message: string, status: number) {
@@ -10,8 +11,7 @@ export const validTaskId = (uuid: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{
 export async function forwardTasks(request: NextRequest, suffix = "", image = false): Promise<NextResponse> {
   const mutation = request.method !== "GET";
   if (mutation) {
-    const origin = request.headers.get("origin");
-    if (!origin || origin !== request.nextUrl.origin) return taskError("ACCESS_DENIED", "Недопустимый источник запроса", 403);
+    if (!hasSameOrigin(request)) return taskError("ACCESS_DENIED", "Недопустимый источник запроса", 403);
     if (request.method !== "DELETE") {
       const expected = image ? "multipart/form-data;" : "application/json";
       if (!request.headers.get("content-type")?.startsWith(expected)) return taskError("INVALID_CONTENT_TYPE", image ? "Ожидается изображение" : "Ожидается JSON", 415);

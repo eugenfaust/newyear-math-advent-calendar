@@ -1,4 +1,5 @@
 import { getAccessToken } from "@/lib/auth-token";
+import { hasSameOrigin } from "@/lib/same-origin";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function forwardCalendar(request: NextRequest, suffix = ""): Promise<NextResponse> {
@@ -21,7 +22,7 @@ export async function forwardCalendar(request: NextRequest, suffix = ""): Promis
 }
 
 export async function forwardCalendarCompletion(request: NextRequest, day: string): Promise<NextResponse> {
-  if (request.headers.get("origin") !== request.nextUrl.origin) return error("ACCESS_DENIED", "Недопустимый источник запроса", 403);
+  if (!hasSameOrigin(request)) return error("ACCESS_DENIED", "Недопустимый источник запроса", 403);
   if (!request.headers.get("content-type")?.toLowerCase().startsWith("application/json")) {
     return error("INVALID_CONTENT_TYPE", "Ожидается JSON", 415);
   }

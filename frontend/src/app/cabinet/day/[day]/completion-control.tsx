@@ -51,6 +51,7 @@ export function CompletionControl({ day, year, completed }: { day: number; year:
       setReward(result.reward);
       void queryClient.invalidateQueries({ queryKey: ["calendar"] });
       void queryClient.invalidateQueries({ queryKey: ["calendar-day", year, day] });
+      void queryClient.invalidateQueries({ queryKey: ["tree", year] });
       router.refresh();
     },
   });

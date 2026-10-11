@@ -1,13 +1,11 @@
 import { getAccessToken } from "@/lib/auth-token";
+import { hasSameOrigin } from "@/lib/same-origin";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function forwardUsers(request: NextRequest, suffix = ""): Promise<NextResponse> {
   const mutation = request.method !== "GET";
   if (mutation) {
-    const origin = request.headers.get("origin");
-    const host = request.headers.get("host");
-    const protocol = request.headers.get("x-forwarded-proto") ?? request.nextUrl.protocol.slice(0, -1);
-    if (!origin || !host || !["http", "https"].includes(protocol) || origin !== `${protocol}://${host}`) return error("ACCESS_DENIED", "Недопустимый источник запроса", 403);
+    if (!hasSameOrigin(request)) return error("ACCESS_DENIED", "Недопустимый источник запроса", 403);
     if (request.method !== "DELETE" && !request.headers.get("content-type")?.startsWith("application/json")) {
       return error("INVALID_CONTENT_TYPE", "Ожидается JSON", 415);
     }

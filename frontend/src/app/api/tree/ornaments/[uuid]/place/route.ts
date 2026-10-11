@@ -1,11 +1,12 @@
 import { getAccessToken } from "@/lib/auth-token";
+import { hasSameOrigin } from "@/lib/same-origin";
 import { error } from "../../../../calendar/shared";
 import { NextRequest, NextResponse } from "next/server";
 
 type Context = { params: Promise<{ uuid: string }> };
 
 export async function POST(request: NextRequest, context: Context): Promise<NextResponse> {
-  if (request.headers.get("origin") !== request.nextUrl.origin) return error("ACCESS_DENIED", "Недопустимый источник запроса", 403);
+  if (!hasSameOrigin(request)) return error("ACCESS_DENIED", "Недопустимый источник запроса", 403);
   if (!request.headers.get("content-type")?.toLowerCase().startsWith("application/json")) {
     return error("INVALID_CONTENT_TYPE", "Ожидается JSON", 415);
   }

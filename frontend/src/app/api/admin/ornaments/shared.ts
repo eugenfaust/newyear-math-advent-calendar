@@ -1,4 +1,5 @@
 import { getAccessToken } from "@/lib/auth-token";
+import { hasSameOrigin } from "@/lib/same-origin";
 import { NextRequest, NextResponse } from "next/server";
 
 export const validOrnamentId = (uuid: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(uuid);
@@ -9,7 +10,7 @@ export function ornamentError(code: string, message: string, status: number) {
 
 export async function forwardOrnaments(request: NextRequest, suffix = "", image = false): Promise<NextResponse> {
   if (request.method !== "GET") {
-    if (request.headers.get("origin") !== request.nextUrl.origin) return ornamentError("ACCESS_DENIED", "Недопустимый источник запроса", 403);
+    if (!hasSameOrigin(request)) return ornamentError("ACCESS_DENIED", "Недопустимый источник запроса", 403);
     if (request.method !== "DELETE") {
       const expected = image ? "multipart/form-data;" : "application/json";
       if (!request.headers.get("content-type")?.startsWith(expected)) return ornamentError("INVALID_CONTENT_TYPE", image ? "Ожидается изображение" : "Ожидается JSON", 415);

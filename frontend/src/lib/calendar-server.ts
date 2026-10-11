@@ -6,7 +6,7 @@ import { headers } from "next/headers";
 import { getToken } from "next-auth/jwt";
 import { redirect } from "next/navigation";
 
-async function accessToken(): Promise<string> {
+export async function accessToken(): Promise<string> {
   const requestHeaders = await headers();
   const token = await getToken({ req: { headers: requestHeaders }, secret: process.env.AUTH_SECRET });
   if (!token || typeof token.accessToken !== "string" || typeof token.expiresAt !== "string" || Date.parse(token.expiresAt) <= Date.now()) {

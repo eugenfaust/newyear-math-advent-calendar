@@ -1,4 +1,5 @@
 import { getAccessToken } from "@/lib/auth-token";
+import { hasSameOrigin } from "@/lib/same-origin";
 import { NextRequest, NextResponse } from "next/server";
 
 export const validUuid = (value: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
@@ -9,8 +10,7 @@ export function templateError(code: string, message: string, status: number) {
 
 export async function forwardTemplates(request: NextRequest, suffix = ""): Promise<NextResponse> {
   if (request.method !== "GET") {
-    const origin = request.headers.get("origin");
-    if (!origin || origin !== request.nextUrl.origin) return templateError("ACCESS_DENIED", "Недопустимый источник запроса", 403);
+    if (!hasSameOrigin(request)) return templateError("ACCESS_DENIED", "Недопустимый источник запроса", 403);
     if (request.method !== "DELETE" && !request.headers.get("content-type")?.startsWith("application/json")) {
       return templateError("INVALID_CONTENT_TYPE", "Ожидается JSON", 415);
     }

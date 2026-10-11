@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { ApiError } from "@/lib/api";
 import { getCalendar } from "@/lib/calendar-server";
+import { getTree } from "@/lib/tree-server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import styles from "./cabinet.module.scss";
@@ -23,20 +24,23 @@ export default async function CabinetPage() {
   if (!session?.user?.uuid) redirect("/login");
 
   let calendar;
-  try { calendar = await getCalendar(); }
+  let tree;
+  try { calendar = await getCalendar(); tree = await getTree(calendar.year); }
   catch (error) { return calendarError(error); }
 
   const firstWeekday = (new Date(`${calendar.year}-12-01T00:00:00Z`).getUTCDay() + 6) % 7;
+  const unplacedCount = tree.ornaments.filter((ornament) => ornament.treeSlot === null).length;
 
   return <section className={styles.cabinet} aria-labelledby="cabinet-title">
     <div className={styles.intro}>
       <div><p className={styles.eyebrow}>Математический декабрь · {calendar.year}</p><h1 id="cabinet-title">Ваш календарь, {session.user.displayName}</h1><p className={styles.lede}>Каждый день — новая задача. К пропущенным дням можно вернуться в любое время.</p></div>
-      <Link className={styles.treeLink} href="/cabinet/tree">Перейти к ёлке <span aria-hidden="true">↗</span></Link>
+      <Link className={styles.treeLink} href="/cabinet/tree">Украсить ёлку <span aria-hidden="true">↗</span></Link>
     </div>
 
     <div className={styles.overview}>
       <div><span className={styles.statNumber}>{calendar.completedDays}<span> / {calendar.totalDays}</span></span><span className={styles.statLabel}>заданий выполнено</span></div>
       <div><span className={styles.statNumber}>{calendar.availableDays}</span><span className={styles.statLabel}>дней открыто</span></div>
+      <div><span className={styles.statNumber}>{unplacedCount}</span><span className={styles.statLabel}>игрушек без места</span></div>
       <div className={styles.progressBlock}><div className={styles.progressText}><span>Прогресс календаря</span><span>{calendar.completedDays} из {calendar.totalDays}</span></div><progress value={calendar.completedDays} max={calendar.totalDays} aria-label="Прогресс календаря" /></div>
     </div>
 
