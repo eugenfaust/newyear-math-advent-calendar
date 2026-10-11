@@ -1,0 +1,20 @@
+.section { display: grid; gap: 22px; }
+.section h1 { margin: 0 0 8px; }
+.section p { margin: 0; }
+.heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; }
+.search { display: flex; align-items: flex-end; gap: 12px; max-width: 650px; }
+.search > :first-child { flex: 1; }
+.tableWrap { overflow-x: auto; }
+.table { width: 100%; border-collapse: collapse; text-align: left; }
+.table th, .table td { padding: 12px; border-bottom: 1px solid #ddd; }
+.table th { color: #555; font-weight: 600; }
+.pagination, .pagination > div, .actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.pagination { justify-content: space-between; }
+.form { display: grid; gap: 20px; max-width: 560px; }
+.field { display: grid; gap: 8px; }
+.field select { width: 100%; min-height: 42px; padding: 8px 12px; border: 1px solid #aaa; border-radius: 6px; background: #fff; font: inherit; }
+.check { display: flex; align-items: center; gap: 8px; }
+.check input { width: 18px; height: 18px; }
+.error { color: #b42318; }
+.success { color: #067647; }
+@media (max-width: 640px) { .heading, .search { flex-direction: column; align-items: stretch; } .table { min-width: 700px; } }
