@@ -20,6 +20,7 @@ function errorMessage(error: unknown): string {
   switch (error.code) {
     case "NO_ACTIVE_ORNAMENTS": return "Пока нет игрушек для награды. Попробуйте завершить задание позже.";
     case "ADVENT_DAY_LOCKED": return "Этот день ещё закрыт. Обновите страницу, чтобы увидеть дату открытия.";
+    case "ADVENT_DAY_EXPIRED": return "Срок выполнения этого задания истёк. Обновите календарь.";
     case "ADVENT_CALENDAR_NOT_FOUND": return "Календарь не найден. Вернитесь к списку дней и обновите страницу.";
     case "ADVENT_DAY_NOT_FOUND": return "Задание не найдено. Вернитесь к списку дней и обновите страницу.";
     case "UNAUTHENTICATED": return "Сеанс закончился. Войдите снова, чтобы завершить задание.";

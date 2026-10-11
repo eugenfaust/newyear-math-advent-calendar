@@ -33,8 +33,12 @@ final class CompleteAdventDayService
             if (!$progress) throw new CalendarAccessException('ADVENT_DAY_NOT_FOUND', 404, 'Day not found.');
             $this->em->lock($progress, LockMode::PESSIMISTIC_WRITE);
 
-            if ($this->availability->status($progress, $now) === 'locked') {
+            $status = $this->availability->status($progress, $now);
+            if ($status === 'locked') {
                 throw new CalendarAccessException('ADVENT_DAY_LOCKED', 403, 'Day is locked.');
+            }
+            if ($status === 'expired') {
+                throw new CalendarAccessException('ADVENT_DAY_EXPIRED', 403, 'Day has expired.');
             }
             if ($progress->getCompletedAt() !== null) {
                 $reward = $this->em->getRepository(UserOrnament::class)->findOneBy(['dayProgress' => $progress]);

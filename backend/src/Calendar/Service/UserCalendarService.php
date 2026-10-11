@@ -29,7 +29,7 @@ final class UserCalendarService
         foreach ($progresses as $progress) {
             $status = $this->availability->status($progress, $now);
             if ($status === 'completed') $completed++;
-            if ($status !== 'locked') $unlocked++;
+            if ($status === 'available' || $status === 'completed') $unlocked++;
             $days[] = [
                 'day' => $progress->getDay(),
                 'status' => $status,
@@ -51,8 +51,12 @@ final class UserCalendarService
         $calendar = $this->calendar($user, $year);
         $progress = $this->em->getRepository(AdventDayProgress::class)->findOneBy(['calendar' => $calendar, 'day' => $day]);
         if (!$progress) throw new CalendarAccessException('ADVENT_DAY_NOT_FOUND', 404, 'Day not found.');
-        if ($this->availability->status($progress, $now) === 'locked') {
+        $status = $this->availability->status($progress, $now);
+        if ($status === 'locked') {
             throw new CalendarAccessException('ADVENT_DAY_LOCKED', 403, 'Day is locked.');
+        }
+        if ($status === 'expired') {
+            throw new CalendarAccessException('ADVENT_DAY_EXPIRED', 403, 'Day has expired.');
         }
         $result = $this->em->wrapInTransaction(function () use ($calendar, $day, $now): AdventDayProgress {
             // Lock the calendar first so concurrent first opens have one startedAt.

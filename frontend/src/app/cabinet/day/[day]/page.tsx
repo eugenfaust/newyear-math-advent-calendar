@@ -41,6 +41,7 @@ export default async function DayPage({ params }: Props) {
   const summary = calendar.days.find((item) => item.day === day);
   if (!summary) notFound();
   if (summary.status === "locked") return statePage(day, summary, "Этот день ещё закрыт", `Задание откроется ${formatLongDate(summary.availableOn)}.`);
+  if (summary.status === "expired") return statePage(day, summary, "Срок выполнения истёк", "Задание осталось невыполненным. Вернитесь к календарю и выберите доступный день.");
 
   let detail;
   try { detail = await getCalendarDay(day, calendar.year); }
@@ -48,6 +49,7 @@ export default async function DayPage({ params }: Props) {
     if (error instanceof ApiError) {
       if (error.code === "UNAUTHENTICATED") redirect("/login");
       if (error.code === "ADVENT_DAY_LOCKED") return statePage(day, summary, "Этот день ещё закрыт", `Задание откроется ${formatLongDate(summary.availableOn)}.`);
+      if (error.code === "ADVENT_DAY_EXPIRED") return statePage(day, summary, "Срок выполнения истёк", "Задание осталось невыполненным. Вернитесь к календарю и выберите доступный день.");
       if (error.code === "ADVENT_CALENDAR_NOT_FOUND") return statePage(day, summary, "Календарь не найден", "Вернитесь к календарю и попробуйте ещё раз.");
       if (error.code === "ADVENT_DAY_NOT_FOUND") notFound();
     }

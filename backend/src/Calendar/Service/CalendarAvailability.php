@@ -30,6 +30,9 @@ final class CalendarAvailability
         if ($progress->getCompletedAt() !== null) return 'completed';
         if ($progress->getCalendar()->getUser()->isTestUser()) return 'available';
         $today = $now->setTimezone($this->timezone)->format('Y-m-d');
-        return $today >= $this->availableOn($progress->getCalendar()->getYear(), $progress->getDay()) ? 'available' : 'locked';
+        $availableOn = $this->availableOn($progress->getCalendar()->getYear(), $progress->getDay());
+        if ($today < $availableOn) return 'locked';
+        $lastAvailableOn = (new \DateTimeImmutable($availableOn, $this->timezone))->modify('+2 days')->format('Y-m-d');
+        return $today <= $lastAvailableOn ? 'available' : 'expired';
     }
 }

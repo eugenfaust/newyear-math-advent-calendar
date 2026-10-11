@@ -6,7 +6,7 @@
 
 Веб-приложение — математический адвент-календарь к Новому году.
 
-Пользователь авторизуется по логину/паролю и получает персональный адвент-календарь на декабрь. С 1 по 31 декабря ежедневно открывается новое математическое задание. Если пользователь пропустил день, ранее открытые задания остаются доступными и могут быть выполнены позже.
+Пользователь авторизуется по логину/паролю и получает персональный адвент-календарь на декабрь. С 1 по 31 декабря ежедневно открывается новое математическое задание. Пропущенный день можно выполнить в течение двух следующих календарных дней; затем незавершённое задание остаётся в календаре со статусом `expired`.
 
 За выполнение каждого задания пользователь получает новогоднюю игрушку. Полученную игрушку можно самостоятельно разместить на своей виртуальной ёлке. На ёлке предусмотрено 31 место (slot), поэтому к концу календаря пользователь может собрать полностью украшенную персональную ёлку.
 
@@ -443,11 +443,16 @@ openedAt = now()
 ```text
 01.12.2026 -> доступен day 1
 02.12.2026 -> доступны day 1..2
+03.12.2026 -> доступны day 1..3
+04.12.2026 -> day 1 expired; доступны day 2..4
 ...
-31.12.2026 -> доступны day 1..31
+31.12.2026 -> доступны незавершённые day 29..31
+01.01.2027 -> доступны незавершённые day 30..31
+02.01.2027 -> доступен незавершённый day 31
+03.01.2027 -> все незавершённые дни expired
 ```
 
-Пропущенные задания НЕ блокируются.
+Незавершённый день доступен в дату открытия и следующие два календарных дня в `APP_TIMEZONE`. После этого он получает статус `expired` и не может быть открыт или выполнен. Уже выполненный день остаётся `completed` и доступен для просмотра.
 
 Например 10 декабря пользователь выполнил:
 
@@ -465,9 +470,9 @@ openedAt = now()
 01 ✓
 02 ✓
 03 ✓
-04 available
+04 expired
 05 ✓
-06 available
+06 expired
 07 ✓
 08 available
 09 available
@@ -479,7 +484,7 @@ openedAt = now()
 31 locked
 ```
 
-После 31 декабря незавершённые задания должны оставаться доступными, если календарь не был административно закрыт.
+После 31 декабря дни 30 и 31 ещё доступны до конца своего трёхдневного окна. История календаря и выполненные задания сохраняются.
 
 Дата доступности обязательно проверяется backend.
 
@@ -844,6 +849,7 @@ States:
 completed
 available
 locked
+expired
 ```
 
 ---
@@ -1590,7 +1596,7 @@ Show:
 
 Do NOT show it as failure.
 
-Show it as simply available.
+Show it as available through the end of its two additional calendar days. After that show `expired` without task content.
 
 ## Completed
 
@@ -1817,7 +1823,7 @@ User chooses where to place an ornament.
 
 ## Decision 8
 
-Missing a day does not remove access to the task.
+Missing a day leaves two additional calendar days to complete it. On the fourth date an incomplete day expires.
 
 ## Decision 9
 
@@ -1950,7 +1956,7 @@ Project is MVP-ready when:
 8. Admin can assign a template to a user.
 9. User can log in.
 10. User sees only unlocked days.
-11. User can open previously missed days.
+11. User can open previously missed days during the two following calendar days; later incomplete days remain expired.
 12. User cannot open a future day via direct API request.
 13. User can complete an available task.
 14. Exactly one ornament is issued.

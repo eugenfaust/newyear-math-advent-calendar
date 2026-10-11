@@ -93,7 +93,7 @@ try {
     $owner = $em->find(User::class, $owner->getUuid());
     check($owner instanceof User, 'Owner disappeared after concurrent requests.');
     $first = $workerResults[0];
-    $again = $service->complete($owner, 2026, 1, $at->modify('+1 day'));
+    $again = $service->complete($owner, 2026, 1, $at->modify('+3 days'));
     check($first === $again, 'Duplicate completion changed the result.');
     check($first['completedAt'] === '2026-12-02T12:00:00Z', 'Incorrect completion timestamp.');
     $second = $service->complete($owner, 2026, 2, $at);

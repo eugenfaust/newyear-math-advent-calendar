@@ -9,10 +9,12 @@ use App\Calendar\Entity\AdventCalendar;
 use App\Calendar\Entity\AdventDayProgress;
 use App\Calendar\Service\CalendarAccessException;
 use App\Calendar\Service\CalendarAvailability;
+use App\Calendar\Service\CompleteAdventDayService;
 use App\Calendar\Service\UserCalendarService;
 use App\Kernel;
 use App\Task\Entity\Task;
 use App\Task\Storage\LocalImageStorage;
+use App\Ornament\Storage\LocalOrnamentImageStorage;
 use App\Template\Entity\AdventTemplate;
 use App\User\Entity\AccessToken;
 use App\User\Entity\User;
@@ -55,10 +57,13 @@ try {
     $cases = [
         ['2026-11-30 20:59:59', 0],
         ['2026-11-30 21:00:00', 1],
-        ['2026-12-30 20:59:59', 30],
-        ['2026-12-30 21:00:00', 31],
-        ['2026-12-31 20:59:59', 31],
-        ['2026-12-31 21:00:00', 31],
+        ['2026-12-03 20:59:59', 3],
+        ['2026-12-03 21:00:00', 3],
+        ['2026-12-30 20:59:59', 3],
+        ['2026-12-30 21:00:00', 3],
+        ['2026-12-31 20:59:59', 3],
+        ['2026-12-31 21:00:00', 2],
+        ['2027-01-02 21:00:00', 0],
     ];
     foreach ($cases as [$instant, $expected]) {
         $summary = $service->summary($owner, 2026, $time($instant));
@@ -77,12 +82,17 @@ try {
     check($opened['openedAt'] === '2026-11-30T21:00:00Z', 'First opening not recorded.');
     check($calendar->getStartedAt()?->format('Y-m-d\TH:i:s\Z') === $opened['openedAt'], 'Calendar start not recorded.');
     check(!array_key_exists('correctAnswer', $opened['task']) && !array_key_exists('solution', $opened['task']), 'Private task data disclosed.');
-    $reopened = $service->day($owner, 2026, 1, $time('2026-12-05 12:00:00'));
+    $reopened = $service->day($owner, 2026, 1, $time('2026-12-02 12:00:00'));
     check($reopened['openedAt'] === $opened['openedAt'], 'Repeated opening changed openedAt.');
+    try { $service->day($owner, 2026, 1, $time('2026-12-03 21:00:00')); throw new RuntimeException('Expired day opened.'); }
+    catch (CalendarAccessException $error) { check($error->errorCode === 'ADVENT_DAY_EXPIRED' && $error->httpStatus === 403, 'Wrong expired-day error.'); }
+    check($first->getCompletedAt() === null, 'Expired day was completed.');
 
     try { $service->day($owner, 2026, 31, $time('2026-12-30 20:59:59')); throw new RuntimeException('Future day opened.'); }
     catch (CalendarAccessException $error) { check($error->errorCode === 'ADVENT_DAY_LOCKED', 'Future day returned wrong error.'); }
-    check($service->day($owner, 2026, 31, $time('2027-01-01 00:00:00'))['status'] === 'available', 'Missed day blocked after December.');
+    check($service->day($owner, 2026, 31, $time('2027-01-01 00:00:00'))['status'] === 'available', 'Day 31 should remain available on January 1.');
+    try { $service->day($owner, 2026, 31, $time('2027-01-03 00:00:00')); throw new RuntimeException('Expired December 31 opened.'); }
+    catch (CalendarAccessException $error) { check($error->errorCode === 'ADVENT_DAY_EXPIRED', 'Wrong expiration after December.'); }
 
     foreach (['summary', 'day'] as $method) {
         try {
@@ -130,6 +140,9 @@ try {
     check(!str_contains((string) $adminResponse->getContent(), 'Safe content'), 'Admin progress disclosed task content.');
     $missing = $requestProgress('/api/v1/admin/users/'.$owner->getUuid().'/calendars/2027/progress', $otherToken);
     check($missing->getStatusCode() === 404, 'Missing calendar progress was accessible.');
+    $completion = new CompleteAdventDayService($em, $availability, new LocalOrnamentImageStorage('/uploads'));
+    try { $completion->complete($owner, 2026, 1, $time('2026-12-03 21:00:00')); throw new RuntimeException('Expired day was completed.'); }
+    catch (CalendarAccessException $error) { check($error->errorCode === 'ADVENT_DAY_EXPIRED' && $error->httpStatus === 403, 'Wrong expired completion error.'); }
 } finally {
     $connection->rollBack();
     $kernel->shutdown();

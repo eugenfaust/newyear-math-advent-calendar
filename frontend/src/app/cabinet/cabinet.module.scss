@@ -24,6 +24,7 @@
 .availableDot { background: var(--winter-emerald); }
 .completedDot { background: var(--winter-completed); }
 .lockedDot { background: #b8c1ce; }
+.expiredDot { background: #a66a71; }
 .calendarGrid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 9px; }
 .weekday { padding: 0 10px 8px; color: #687892; font-size: .76rem; font-weight: 700; text-align: right; }
 .day { position: relative; display: flex; flex-direction: column; justify-content: space-between; min-height: 96px; padding: 13px; border: 1px solid #d8e0ee; border-radius: 9px; color: #17243b; text-decoration: none; transition: border-color .2s, background .2s, transform .2s; }
@@ -38,6 +39,8 @@
 .completed:hover { transform: translateY(-2px); border-color: var(--winter-completed-hover); background: var(--winter-completed-hover); }
 .locked { background: #f4f8fa; color: #607589; }
 .locked .dayMark { color: #a6b0be; }
+.expired { background: #f7eef0; border-color: #dfc8cd; color: #805057; }
+.expired .dayMark { color: #a66a71; }
 .dayPage { max-width: 820px; }
 .backLink { display: inline-flex; margin-bottom: 30px; color: var(--winter-emerald); font-weight: 700; text-underline-offset: 4px; }
 .dayHeader { margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid #d8e0ee; }

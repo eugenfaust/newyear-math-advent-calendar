@@ -55,7 +55,9 @@ try {
     $completion = new CompleteAdventDayService($em, $availability, $images);
     $treeService = new UserTreeService($em, $images);
     $now = new DateTimeImmutable('2027-01-01 12:00:00', new DateTimeZone('UTC'));
-    releaseCheck($calendarService->summary($user, 2026, $now)['availableDays'] === 31, 'Missed December days are unavailable.');
+    releaseCheck($calendarService->summary($user, 2026, $now)['availableDays'] === 2, 'Only December 30 and 31 should remain available.');
+    $user->setTestUser(true);
+    releaseCheck($calendarService->summary($user, 2026, $now)['availableDays'] === 31, 'Test user should have all days available.');
     for ($day = 1; $day <= 31; $day++) {
         $opened = $calendarService->day($user, 2026, $day, $now);
         releaseCheck($opened['task']['title'] === 'Task '.$day, 'Assigned task mismatch.');
@@ -63,6 +65,7 @@ try {
         releaseCheck($completion->complete($user, 2026, $day, $now) === $result, 'Completion retry changed reward.');
         $treeService->place($user, 2026, $result['reward']['uuid'], $day, $now);
     }
+    $user->setTestUser(false);
     $summary = $calendarService->summary($user, 2026, $now);
     $tree = $treeService->summary($user, 2026);
     releaseCheck($summary['completedDays'] === 31 && $tree['completed'] === true, 'Final progress was not reached.');

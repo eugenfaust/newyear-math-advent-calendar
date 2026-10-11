@@ -9,7 +9,7 @@ import { readResponse, type AssignedCalendar } from "./types";
 import styles from "./users.module.scss";
 
 type AdminProgress = { calendar: AssignedCalendar; progress: UserCalendar; tree: UserTree };
-const labels = { locked: "Ещё закрыт", available: "Доступен", completed: "Выполнен" } as const;
+const labels = { locked: "Ещё закрыт", available: "Доступен", expired: "Срок истёк", completed: "Выполнен" } as const;
 
 export function CalendarProgress({ uuid, year }: { uuid: string; year: number }) {
   const { data, isPending, isError, refetch } = useQuery({
@@ -28,8 +28,8 @@ export function CalendarProgress({ uuid, year }: { uuid: string; year: number })
     <div className={styles.progressBody}>
       <div>
         <p className={styles.progressCaption}>Состояние дней</p>
-        <ol className={styles.progressDays}>{data.progress.days.map((day) => <li key={day.day} className={styles[day.status]} title={`${day.day} декабря: ${labels[day.status]}`} aria-label={`${day.day} декабря: ${labels[day.status]}`}><span>{day.day}</span><small aria-hidden="true">{day.status === "completed" ? "✓" : day.status === "available" ? "○" : "·"}</small></li>)}</ol>
-        <p className={styles.progressLegend}>✓ Выполнен · ○ Доступен · · Ещё закрыт</p>
+        <ol className={styles.progressDays}>{data.progress.days.map((day) => <li key={day.day} className={styles[day.status]} title={`${day.day} декабря: ${labels[day.status]}`} aria-label={`${day.day} декабря: ${labels[day.status]}`}><span>{day.day}</span><small aria-hidden="true">{day.status === "completed" ? "✓" : day.status === "available" ? "○" : day.status === "expired" ? "×" : "·"}</small></li>)}</ol>
+        <p className={styles.progressLegend}>✓ Выполнен · ○ Доступен · × Срок истёк · · Ещё закрыт</p>
       </div>
       <div className={styles.adminTree}>
         <div className={styles.adminTreeHeading}><p className={styles.progressCaption}>Ёлка пользователя</p><span>{ornaments.size} из 31 мест занято</span></div>

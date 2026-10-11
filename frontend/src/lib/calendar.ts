@@ -1,4 +1,4 @@
-export type CalendarDayStatus = "locked" | "available" | "completed";
+export type CalendarDayStatus = "locked" | "available" | "expired" | "completed";
 
 export type CalendarDaySummary = {
   day: number;

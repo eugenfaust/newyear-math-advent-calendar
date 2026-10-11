@@ -33,26 +33,26 @@ export default async function CabinetPage() {
 
   return <section className={styles.cabinet} aria-labelledby="cabinet-title">
     <div className={styles.intro}>
-      <div><p className={styles.eyebrow}>Математический декабрь · {calendar.year}</p><h1 id="cabinet-title">Ваш календарь, {session.user.displayName}</h1><p className={styles.lede}>Каждый день — новая задача. К пропущенным дням можно вернуться в любое время.</p></div>
+      <div><p className={styles.eyebrow}>Математический декабрь · {calendar.year}</p><h1 id="cabinet-title">Ваш календарь, {session.user.displayName}</h1><p className={styles.lede}>Каждый день — новая задача. На выполнение есть день открытия и ещё два дня.</p></div>
       <Link className={styles.treeLink} href="/cabinet/tree">Украсить ёлку <span aria-hidden="true">↗</span></Link>
     </div>
 
     <div className={styles.overview}>
       <div><span className={styles.statNumber}>{calendar.completedDays}<span> / {calendar.totalDays}</span></span><span className={styles.statLabel}>заданий выполнено</span></div>
-      <div><span className={styles.statNumber}>{calendar.availableDays}</span><span className={styles.statLabel}>дней открыто</span></div>
+      <div><span className={styles.statNumber}>{calendar.availableDays}</span><span className={styles.statLabel}>дней доступно и выполнено</span></div>
       <div><span className={styles.statNumber}>{unplacedCount}</span><span className={styles.statLabel}>игрушек без места</span></div>
       <div className={styles.progressBlock}><div className={styles.progressText}><span>Прогресс календаря</span><span>{calendar.completedDays} из {calendar.totalDays}</span></div><progress value={calendar.completedDays} max={calendar.totalDays} aria-label="Прогресс календаря" /></div>
     </div>
 
-    <div className={styles.gridHeading}><div><p className={styles.eyebrow}>01—31 декабря</p><h2>Выберите день</h2></div><div className={styles.legend} aria-label="Обозначения"><span><i className={styles.availableDot} />Доступен</span><span><i className={styles.completedDot} />Выполнен</span><span><i className={styles.lockedDot} />Закрыт</span></div></div>
+    <div className={styles.gridHeading}><div><p className={styles.eyebrow}>01—31 декабря</p><h2>Выберите день</h2></div><div className={styles.legend} aria-label="Обозначения"><span><i className={styles.availableDot} />Доступен</span><span><i className={styles.completedDot} />Выполнен</span><span><i className={styles.lockedDot} />Ещё закрыт</span><span><i className={styles.expiredDot} />Срок истёк</span></div></div>
     <div className={styles.calendarGrid} aria-label={`Календарь на декабрь ${calendar.year} года`}>
       {weekdays.map((weekday) => <span className={styles.weekday} key={weekday}>{weekday}</span>)}
       {Array.from({ length: firstWeekday }, (_, index) => <span className={styles.spacer} key={`spacer-${index}`} aria-hidden="true" />)}
       {calendar.days.map((day) => {
-        const label = `${day.day} декабря: ${day.status === "completed" ? "выполнено" : day.status === "available" ? "доступно" : `откроется ${formatDate(day.availableOn)}`}`;
-        const content = <><span className={styles.dayNumber}>{day.day}</span><span className={styles.dayState}>{day.status === "completed" ? "Готово" : day.status === "available" ? "Открыть" : "Закрыто"}</span><span className={styles.dayMark} aria-hidden="true">{day.status === "completed" ? "✓" : day.status === "locked" ? "·" : "↗"}</span></>;
-        return day.status === "locked"
-          ? <div key={day.day} className={`${styles.day} ${styles.locked}`} aria-label={label} title={label}>{content}</div>
+        const label = `${day.day} декабря: ${day.status === "completed" ? "выполнено" : day.status === "available" ? "доступно" : day.status === "expired" ? "срок выполнения истёк" : `откроется ${formatDate(day.availableOn)}`}`;
+        const content = <><span className={styles.dayNumber}>{day.day}</span><span className={styles.dayState}>{day.status === "completed" ? "Готово" : day.status === "available" ? "Открыть" : day.status === "expired" ? "Истёк" : "Закрыто"}</span><span className={styles.dayMark} aria-hidden="true">{day.status === "completed" ? "✓" : day.status === "available" ? "↗" : "·"}</span></>;
+        return day.status === "locked" || day.status === "expired"
+          ? <div key={day.day} className={`${styles.day} ${day.status === "expired" ? styles.expired : styles.locked}`} aria-label={label} title={label}>{content}</div>
           : <Link key={day.day} className={`${styles.day} ${day.status === "completed" ? styles.completed : styles.available}`} href={`/cabinet/day/${day.day}`} aria-label={label} prefetch={false}>{content}</Link>;
       })}
     </div>

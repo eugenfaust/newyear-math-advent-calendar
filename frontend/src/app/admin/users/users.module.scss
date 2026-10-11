@@ -46,6 +46,7 @@
 .progressDays li { display: flex; align-items: center; justify-content: space-between; min-height: 38px; padding: 4px 6px; border-radius: 5px; font-variant-numeric: tabular-nums; }
 .progressDays small { font-weight: 700; }
 .locked { color: #63718a; background: #edf0f5; }
+.expired { color: #805057; background: #f7eef0; }
 .available { color: #765117; background: #fff0cb; }
 .completed { color: #fff; background: var(--winter-completed); }
 .progressLegend { margin-top: 12px !important; color: #586781; font-size: .8rem; }
