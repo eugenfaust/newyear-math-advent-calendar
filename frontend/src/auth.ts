@@ -43,6 +43,7 @@ type AuthTokenFields = {
 };
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  pages: { signIn: "/login" },
   session: { strategy: "jwt", maxAge: 12 * 60 * 60 },
   providers: [
     Credentials({

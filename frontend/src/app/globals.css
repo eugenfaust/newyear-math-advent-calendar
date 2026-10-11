@@ -1,9 +1,7 @@
-:root {
-  color-scheme: light;
-  font-family: Arial, Helvetica, sans-serif;
-}
+@import '@astryxdesign/core/reset.css';
+@import '@astryxdesign/core/astryx.css';
 
-body {
-  margin: 0;
-  padding: 2rem;
+@layer app {
+  html, body { min-height: 100%; }
+  body { margin: 0; }
 }

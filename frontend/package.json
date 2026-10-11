@@ -9,10 +9,19 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@astryxdesign/cli": "^0.6.8",
+    "@astryxdesign/core": "^0.6.8",
+    "@astryxdesign/theme-neutral": "^0.6.8",
+    "@hookform/resolvers": "^5.9.1",
+    "@stylexjs/stylex": "^0.19.1",
+    "@tabler/icons-react": "^3.49.0",
+    "@tanstack/react-query": "^5.104.1",
     "next": "15.5.27",
     "next-auth": "^5.0.0-beta.32",
     "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "react-hook-form": "^7.90.0",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -21,6 +30,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.5.27",
+    "sass": "^1.105.1",
     "typescript": "^5"
   }
 }

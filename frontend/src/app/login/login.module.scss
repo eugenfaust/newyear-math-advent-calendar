@@ -1,0 +1,6 @@
+.page { min-height: 100dvh; display: grid; place-items: center; padding: 24px; background: var(--color-background, #f5f4f2); }
+.card { width: min(100%, 420px); }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; margin-bottom: 28px; }
+.lead { margin: 0 0 26px; color: var(--color-text-secondary, #666); }
+.form { display: grid; gap: 18px; }
+.error { margin: 0; color: #b42318; }

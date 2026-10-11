@@ -1,8 +1,7 @@
-export default function Home() {
-  return (
-    <main>
-      <h1>Advent Calendar</h1>
-      <p>Основа приложения готова. Вход и календарь появятся в следующих задачах.</p>
-    </main>
-  );
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
+
+export default async function Home() {
+  const session = await auth();
+  redirect(!session?.user?.uuid ? "/login" : session.user.roles.includes("ROLE_ADMIN") ? "/admin" : "/cabinet");
 }
