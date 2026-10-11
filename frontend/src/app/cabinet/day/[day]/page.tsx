@@ -5,6 +5,7 @@ import type { CalendarDaySummary } from "@/lib/calendar";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import styles from "../../cabinet.module.scss";
+import { CompletionControl } from "./completion-control";
 
 export const dynamic = "force-dynamic";
 
@@ -57,6 +58,6 @@ export default async function DayPage({ params }: Props) {
     <Link href="/cabinet" className={styles.backLink}>← К календарю</Link>
     <div className={styles.dayHeader}><p className={styles.eyebrow}>День {day} · {formatLongDate(detail.availableOn)}</p><h1>{detail.status === "completed" ? "Задание выполнено" : "Задание дня"}</h1></div>
     <TaskContent title={detail.task.title} content={detail.task.content} imageUrl={detail.task.imageUrl} />
-    {detail.status === "completed" && <p className={styles.completedNote}>Вы выполнили это задание.</p>}
+    <CompletionControl day={day} year={calendar.year} completed={detail.status === "completed"} />
   </section>;
 }

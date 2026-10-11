@@ -41,12 +41,28 @@
 .dayHeader { margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid #d8e0ee; }
 .dayHeader p:not(.eyebrow) { color: #526178; line-height: 1.6; }
 .completedNote { margin-top: 30px; padding: 14px 18px; border-left: 3px solid #35866d; background: #eff8f3; font-weight: 650; }
+.completionArea { margin-top: 30px; }
+.completeButton { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 12px 20px; border: 0; border-radius: 9px; background: #3657a7; color: #fff; font: inherit; font-weight: 700; text-decoration: none; cursor: pointer; transition: background .2s, transform .2s; }
+.completeButton:hover:not(:disabled) { background: #284788; transform: translateY(-2px); }
+.completeButton:disabled { cursor: wait; opacity: .7; }
+.completionError { max-width: 540px; margin: 14px 0 0; color: #a33442; line-height: 1.5; }
+.rewardDialog { width: min(440px, calc(100% - 32px)); max-height: calc(100dvh - 32px); padding: 0; overflow: auto; border: 1px solid #b9cce3; border-radius: 16px; background: #f8fbff; color: #17243b; box-shadow: 0 24px 80px #17243b55; }
+.rewardDialog::backdrop { background: #142544af; }
+.rewardCard { padding: 28px; text-align: center; }
+.rewardCard h2 { margin: 0; font-size: clamp(1.55rem, 5vw, 2rem); letter-spacing: -.04em; line-height: 1.15; }
+.rewardDisplay { position: relative; display: flex; align-items: center; justify-content: center; width: 200px; height: 190px; margin: 22px auto 0; border-radius: 100px 100px 14px 14px; background: radial-gradient(circle at 50% 62%, #f8fbff 0, #e8f0fb 65%, #dce9f8 100%); }
+.rewardThread { position: absolute; top: 0; left: 50%; width: 1px; height: 24px; background: #7390b9; }
+.rewardDisplay img { width: 160px; height: 160px; margin-top: 20px; object-fit: contain; filter: drop-shadow(0 8px 8px #24446733); }
+.rewardName { margin: 10px 0 24px; font-size: 1.1rem; font-weight: 750; }
+.rewardActions { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px; }
+.rewardClose { min-height: 46px; padding: 10px 14px; border: 1px solid #a7b9db; border-radius: 9px; background: transparent; color: #27488b; font: inherit; font-weight: 700; cursor: pointer; }
+.rewardClose:hover { background: #eaf1fb; }
 .message { min-height: 260px; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; }
 .message p:not(.eyebrow) { max-width: 540px; color: #526178; line-height: 1.6; }
 .message .backLink { margin-top: 12px; }
 .retryButton { padding: 10px 18px; border: 0; border-radius: 8px; background: #4561ad; color: white; cursor: pointer; font: inherit; font-weight: 700; }
 .retryButton:hover { background: #304b94; }
-.treeLink:focus-visible, .day:focus-visible, .backLink:focus-visible, .retryButton:focus-visible { outline: 3px solid #4561ad; outline-offset: 3px; }
+.treeLink:focus-visible, .day:focus-visible, .backLink:focus-visible, .retryButton:focus-visible, .completeButton:focus-visible, .rewardClose:focus-visible { outline: 3px solid #4561ad; outline-offset: 3px; }
 @media (max-width: 760px) {
   .intro { flex-direction: column; gap: 16px; }
   .overview { grid-template-columns: 1fr 1fr; }
@@ -67,6 +83,6 @@
   .spacer { min-width: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .treeLink, .day { transition: none; }
-  .treeLink:hover, .available:hover, .completed:hover { transform: none; }
+  .treeLink, .day, .completeButton { transition: none; }
+  .treeLink:hover, .available:hover, .completed:hover, .completeButton:hover { transform: none; }
 }
