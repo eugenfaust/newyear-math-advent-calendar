@@ -43,9 +43,13 @@ services:
     environment:
       INTERNAL_API_URL: http://backend:8000/api/v1
       AUTH_SECRET: ${AUTH_SECRET:?set AUTH_SECRET in .env}
+      WATCHPACK_POLLING: "true"
       TZ: UTC
     ports:
       - "127.0.0.1:3000:3000"
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
     depends_on:
       backend:
         condition: service_healthy

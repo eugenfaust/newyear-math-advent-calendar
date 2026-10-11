@@ -9,6 +9,7 @@ import styles from "./app-shell.module.scss";
 export function AppShell({ user, area, children }: { user: ApiUser; area: "cabinet" | "admin"; children: React.ReactNode }) {
   return <div className={styles.shell}>
     <header className={styles.header}>
+      <div className={styles.garland} aria-hidden="true">{Array.from({ length: 17 }, (_, index) => <span key={index} className={styles.bulb} />)}</div>
       <div className={styles.brand}><IconCalendar size={25} aria-hidden /><span>Адвент-календарь</span></div>
       <div className={styles.user}><span>{user.displayName}</span><form action={async () => { "use server"; await signOut({ redirectTo: "/login" }); }}><Button label="Выйти" type="submit" icon={<IconLogout size={17} aria-hidden />} /></form></div>
     </header>

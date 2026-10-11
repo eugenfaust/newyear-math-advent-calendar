@@ -102,7 +102,7 @@ final class OrnamentImageProcessor
             if ($attribute->namespaceURI !== null) throw new \InvalidArgumentException('SVG contains unsupported attributes.');
             if (in_array($name, $numbers, true) && preg_match('/^-?\d+(?:\.\d+)?$/', $value)) continue;
             if ($name === 'viewBox' && $element->localName === 'svg') continue;
-            if (in_array($name, ['fill', 'stroke'], true) && preg_match('/^(?:none|#[0-9a-fA-F]{3,8}|rgb\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*\))$/', $value)) continue;
+            if (in_array($name, ['fill', 'stroke'], true) && preg_match('/^(?:none|white|black|#[0-9a-fA-F]{3,8}|rgb\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*\))$/', $value)) continue;
             if ($name === 'd' && $element->localName === 'path' && preg_match('/^[MmLlHhVvCcSsQqTtAaZz0-9eE+.,\s-]+$/', $value)) continue;
             if ($name === 'points' && in_array($element->localName, ['polygon', 'polyline'], true) && preg_match('/^[0-9eE+.,\s-]+$/', $value)) continue;
             if ($name === 'transform' && preg_match('/^(?:(?:translate|scale|rotate|matrix)\([0-9eE+.,\s-]+\)\s*)+$/', $value)) continue;

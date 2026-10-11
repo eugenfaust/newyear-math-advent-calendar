@@ -1,0 +1,28 @@
+.snow {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.flake {
+  position: absolute;
+  top: -10px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 1px #8fb9d2, 0 0 8px 2px #fff;
+  opacity: 0;
+  animation: fall linear infinite;
+}
+
+@keyframes fall {
+  0% { transform: translate3d(0, -12px, 0); opacity: 0; }
+  8% { opacity: .62; }
+  90% { opacity: .62; }
+  100% { transform: translate3d(28px, 105vh, 0); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flake { animation: none; opacity: 0; }
+}
