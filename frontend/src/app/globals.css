@@ -2,6 +2,33 @@
 @import '@astryxdesign/core/astryx.css';
 
 @layer app {
+  :root {
+    color-scheme: light;
+    --winter-snow: #f2f9ff;
+    --winter-ice: #dceffa;
+    --winter-sky: #c9e5f5;
+    --winter-ink: #183653;
+    --winter-blue: #245b87;
+    --winter-red: #b72b40;
+    --winter-line: #bcd8e9;
+  }
+
+  [data-astryx-theme="neutral"] {
+    --color-background-body: var(--winter-snow);
+    --color-background-surface: #fff;
+    --color-background-card: #fff;
+    --color-background-muted: #e9f5fc;
+    --color-accent: var(--winter-blue);
+    --color-accent-muted: var(--winter-ice);
+    --color-text-primary: var(--winter-ink);
+    --color-text-secondary: #4b657c;
+    --color-text-accent: var(--winter-blue);
+    --color-icon-accent: var(--winter-blue);
+    --color-border: var(--winter-line);
+    --color-on-accent: #fff;
+  }
+
   html, body { min-height: 100%; }
-  body { margin: 0; }
+  body { margin: 0; background: var(--winter-snow); color: var(--winter-ink); }
+  ::selection { background: #f4ccd2; color: var(--winter-ink); }
 }

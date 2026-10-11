@@ -1,18 +1,18 @@
 .page { color: #17243b; }
 .header { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; margin-bottom: 24px; }
-.eyebrow { margin: 0 0 9px; color: #4561ad; font-size: .72rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+.eyebrow { margin: 0 0 9px; color: var(--winter-red); font-size: .72rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
 .header h1 { margin: 0; font-size: clamp(2.1rem, 5vw, 3.5rem); line-height: 1; letter-spacing: -.06em; }
 .lede { max-width: 590px; margin: 13px 0 0; color: #526178; line-height: 1.55; }
 .calendarLink { flex: none; margin-top: 6px; color: #3657a7; font-weight: 700; text-underline-offset: 4px; }
 .layout { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(260px, .8fr); align-items: start; gap: 20px; }
-.finish { display: flex; align-items: center; gap: 15px; margin: 0 0 20px; padding: 15px 20px; border: 1px solid #e7c978; border-radius: 14px; background: #fff8df; color: #514322; }
+.finish { display: flex; align-items: center; gap: 15px; margin: 0 0 20px; padding: 15px 20px; border: 1px solid #edc5ca; border-radius: 14px; background: #fff0f1; color: #6f2533; }
 .finishIcon { flex: none; color: #d39832; font-size: 2rem; }
 .finish strong { font-size: 1.05rem; }
 .finish p { margin: 3px 0 0; font-size: .88rem; line-height: 1.45; }
-.treePanel { min-width: 0; overflow: hidden; border: 1px solid #c9dbe8; border-radius: 16px; background: #e6f0f2; }
-.treeTopline { display: flex; justify-content: space-between; gap: 12px; padding: 15px 20px; border-bottom: 1px solid #c9dbe8; color: #305869; font-size: .76rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
-.canvas { position: relative; overflow: hidden; padding: 10px 10px 0; background: radial-gradient(circle at 50% 20%, #f8fbf7 0, #e8f2ef 35%, #d8e9ed 100%); }
-.canvas::before { position: absolute; inset: 0; pointer-events: none; content: ""; opacity: .35; background-image: linear-gradient(#a3c3ca 1px, transparent 1px), linear-gradient(90deg, #a3c3ca 1px, transparent 1px); background-size: 34px 34px; mask-image: linear-gradient(to bottom, #000, transparent 85%); }
+.treePanel { min-width: 0; overflow: hidden; border: 1px solid #bcd8e9; border-radius: 16px; background: #e4f3fb; }
+.treeTopline { display: flex; justify-content: space-between; gap: 12px; padding: 15px 20px; border-bottom: 1px solid #bcd8e9; color: #305869; font-size: .76rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.canvas { position: relative; overflow: hidden; padding: 10px 10px 0; background: radial-gradient(circle at 50% 20%, #fff 0, #e7f5fd 38%, #c8e4f3 100%); }
+.canvas::before { position: absolute; inset: 0; pointer-events: none; content: ""; opacity: .26; background-image: linear-gradient(#94bed6 1px, transparent 1px), linear-gradient(90deg, #94bed6 1px, transparent 1px); background-size: 34px 34px; mask-image: linear-gradient(to bottom, #000, transparent 85%); }
 .snow { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
 .snow span { position: absolute; top: -12px; width: 5px; height: 5px; border-radius: 50%; background: #fff; box-shadow: 0 0 5px #fff; opacity: .7; animation: snowfall 14s linear infinite; }
 @keyframes snowfall { to { transform: translate(24px, 720px); opacity: .15; } }
@@ -24,7 +24,7 @@
 .starBurst { transform-origin: 220px 58px; animation: star-burst 1.4s ease-out both; pointer-events: none; }
 @keyframes star-burst { 0% { opacity: 0; transform: scale(.45) rotate(-20deg); } 35% { opacity: 1; } 100% { opacity: 0; transform: scale(1.35) rotate(25deg); } }
 .treeSvg { position: relative; display: block; width: min(100%, 530px); height: auto; margin: 0 auto; overflow: visible; }
-.treeHint { margin: 0; padding: 14px 20px 17px; border-top: 1px solid #c9dbe8; color: #305869; font-size: .86rem; line-height: 1.5; }
+.treeHint { margin: 0; padding: 14px 20px 17px; border-top: 1px solid #bcd8e9; color: #305869; font-size: .86rem; line-height: 1.5; }
 .slot { cursor: pointer; outline: none; }
 .slotFocus { fill: transparent; stroke: transparent; stroke-width: 3; }
 .hitArea { fill: transparent; }
@@ -38,10 +38,10 @@
 .selectedSlot .slotFocus { stroke: #ffe3a3; }
 .slot:focus-visible .slotFocus { stroke: #fff; filter: drop-shadow(0 0 4px #173d53); }
 .slot:hover .slotFocus { stroke: #f8cb73; }
-.inventory { min-width: 0; padding: 22px; border: 1px solid #d8e0ee; border-radius: 16px; background: #f8fbff; }
+.inventory { min-width: 0; padding: 22px; border: 1px solid var(--winter-line); border-radius: 16px; background: #f8fcff; }
 .inventoryHeader h2 { margin: 0; font-size: 1.55rem; letter-spacing: -.04em; }
 .inventoryHeader p:last-child { margin: 7px 0 0; color: #526178; font-size: .88rem; }
-.feedback { margin: 19px 0 14px; padding: 12px 14px; border-left: 3px solid #4561ad; background: #eaf1fb; color: #27488b; font-size: .87rem; line-height: 1.45; }
+.feedback { margin: 19px 0 14px; padding: 12px 14px; border-left: 3px solid var(--winter-red); background: #fceef1; color: #762c3a; font-size: .87rem; line-height: 1.45; }
 .error { margin: 10px 0; color: #a33442; font-size: .87rem; line-height: 1.45; }
 .error button { border: 0; padding: 0; color: inherit; background: none; font: inherit; font-weight: 800; text-decoration: underline; cursor: pointer; }
 .syncing { margin: 8px 0; color: #526178; font-size: .8rem; }
@@ -51,7 +51,7 @@
 .ornamentButton { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 70px; padding: 7px 10px; border: 1px solid #d8e0ee; border-radius: 10px; background: #fff; color: #17243b; text-align: left; font: inherit; cursor: pointer; transition: border-color .15s, background .15s, transform .15s; }
 .ornamentButton:hover:not(:disabled) { border-color: #8ba4d9; transform: translateY(-1px); }
 .ornamentButton:disabled { cursor: wait; opacity: .65; }
-.selectedOrnament { border-color: #4561ad; background: #eaf1fb; box-shadow: inset 0 0 0 1px #4561ad; }
+.selectedOrnament { border-color: var(--winter-red); background: #fff1f3; box-shadow: inset 0 0 0 1px var(--winter-red); }
 .ornamentImage { display: grid; flex: none; place-items: center; width: 52px; height: 52px; border-radius: 8px; background: #e8f2ef; }
 .ornamentImage img { max-width: 48px; max-height: 48px; object-fit: contain; }
 .inventoryFallback { color: #b28646; font-size: 1.7rem; }
@@ -62,7 +62,7 @@
 .ornamentArrow { color: #4561ad; font-size: 1.1rem; }
 .empty { margin: 0; color: #526178; font-size: .88rem; line-height: 1.55; }
 .empty a { color: #3657a7; font-weight: 700; }
-.calendarLink:focus-visible, .ornamentButton:focus-visible, .error button:focus-visible { outline: 3px solid #4561ad; outline-offset: 3px; }
+.calendarLink:focus-visible, .ornamentButton:focus-visible, .error button:focus-visible { outline: 3px solid var(--winter-red); outline-offset: 3px; }
 @media (max-width: 800px) { .layout { grid-template-columns: 1fr; } .inventory { padding: 20px; } .ornamentList { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 520px) { .header { flex-direction: column; gap: 12px; } .layout { gap: 14px; } .treeTopline { padding: 12px; font-size: .66rem; } .canvas { padding: 0; } .treeHint { padding: 12px 15px; } .inventory { padding: 17px; } .ornamentList { grid-template-columns: 1fr; } }
 @media (prefers-reduced-motion: reduce) { .ornamentButton { transition: none; } .ornamentButton:hover:not(:disabled) { transform: none; } .snow span, .light, .starBurst { animation: none; } }

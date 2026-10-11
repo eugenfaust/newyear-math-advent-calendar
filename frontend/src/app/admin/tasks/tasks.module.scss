@@ -1,4 +1,4 @@
-.section { --ink: #17243b; --accent: #3657a7; --line: #d6e0f2; display: grid; gap: 24px; color: var(--ink); }
+.section { --ink: var(--winter-ink); --accent: var(--winter-blue); --line: var(--winter-line); display: grid; gap: 24px; color: var(--ink); }
 .section h1, .section p { margin: 0; }
 .heading { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; padding: 0 0 20px; border-bottom: 1px solid var(--line); }
 .heading h1 { margin: 4px 0 8px; font-size: clamp(2rem, 5vw, 3.2rem); line-height: 1; letter-spacing: -.05em; }
