@@ -1,11 +1,11 @@
 .page { color: #17243b; }
 .header { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; margin-bottom: 24px; }
-.eyebrow { margin: 0 0 9px; color: var(--winter-red); font-size: .72rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+.eyebrow { margin: 0 0 9px; color: var(--winter-emerald); font-size: .72rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
 .header h1 { margin: 0; font-size: clamp(2.1rem, 5vw, 3.5rem); line-height: 1; letter-spacing: -.06em; }
 .lede { max-width: 590px; margin: 13px 0 0; color: #526178; line-height: 1.55; }
-.calendarLink { flex: none; margin-top: 6px; color: #3657a7; font-weight: 700; text-underline-offset: 4px; }
+.calendarLink { flex: none; margin-top: 6px; color: var(--winter-emerald); font-weight: 700; text-underline-offset: 4px; }
 .layout { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(260px, .8fr); align-items: start; gap: 20px; }
-.finish { display: flex; align-items: center; gap: 15px; margin: 0 0 20px; padding: 15px 20px; border: 1px solid #edc5ca; border-radius: 14px; background: #fff0f1; color: #6f2533; }
+.finish { display: flex; align-items: center; gap: 15px; margin: 0 0 20px; padding: 15px 20px; border: 1px solid var(--winter-emerald-line); border-radius: 14px; background: var(--winter-emerald-soft); color: var(--winter-emerald-hover); }
 .finishIcon { flex: none; color: #d39832; font-size: 2rem; }
 .finish strong { font-size: 1.05rem; }
 .finish p { margin: 3px 0 0; font-size: .88rem; line-height: 1.45; }
@@ -46,12 +46,12 @@
 .error button { border: 0; padding: 0; color: inherit; background: none; font: inherit; font-weight: 800; text-decoration: underline; cursor: pointer; }
 .syncing { margin: 8px 0; color: #526178; font-size: .8rem; }
 .inventory h3 { display: flex; justify-content: space-between; gap: 12px; margin: 25px 0 11px; padding-bottom: 9px; border-bottom: 1px solid #d8e0ee; font-size: .89rem; }
-.inventory h3 span { color: #4561ad; font-variant-numeric: tabular-nums; }
+.inventory h3 span { color: var(--winter-emerald); font-variant-numeric: tabular-nums; }
 .ornamentList { display: grid; gap: 8px; }
 .ornamentButton { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 70px; padding: 7px 10px; border: 1px solid #d8e0ee; border-radius: 10px; background: #fff; color: #17243b; text-align: left; font: inherit; cursor: pointer; transition: border-color .15s, background .15s, transform .15s; }
-.ornamentButton:hover:not(:disabled) { border-color: #8ba4d9; transform: translateY(-1px); }
+.ornamentButton:hover:not(:disabled) { border-color: var(--winter-red); transform: translateY(-1px); }
 .ornamentButton:disabled { cursor: wait; opacity: .65; }
-.selectedOrnament { border-color: var(--winter-red); background: #fff1f3; box-shadow: inset 0 0 0 1px var(--winter-red); }
+.selectedOrnament { border-color: var(--winter-red); background: var(--winter-red-soft); box-shadow: inset 0 0 0 1px var(--winter-red); }
 .ornamentImage { display: grid; flex: none; place-items: center; width: 52px; height: 52px; border-radius: 8px; background: #e8f2ef; }
 .ornamentImage img { max-width: 48px; max-height: 48px; object-fit: contain; }
 .inventoryFallback { color: #b28646; font-size: 1.7rem; }
@@ -59,9 +59,9 @@
 .ornamentText strong, .ornamentText small { display: block; }
 .ornamentText strong { overflow-wrap: anywhere; font-size: .9rem; line-height: 1.3; }
 .ornamentText small { margin-top: 3px; color: #526178; font-size: .76rem; }
-.ornamentArrow { color: #4561ad; font-size: 1.1rem; }
+.ornamentArrow { color: var(--winter-red); font-size: 1.1rem; }
 .empty { margin: 0; color: #526178; font-size: .88rem; line-height: 1.55; }
-.empty a { color: #3657a7; font-weight: 700; }
+.empty a { color: var(--winter-emerald); font-weight: 700; }
 .calendarLink:focus-visible, .ornamentButton:focus-visible, .error button:focus-visible { outline: 3px solid var(--winter-red); outline-offset: 3px; }
 @media (max-width: 800px) { .layout { grid-template-columns: 1fr; } .inventory { padding: 20px; } .ornamentList { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 520px) { .header { flex-direction: column; gap: 12px; } .layout { gap: 14px; } .treeTopline { padding: 12px; font-size: .66rem; } .canvas { padding: 0; } .treeHint { padding: 12px 15px; } .inventory { padding: 17px; } .ornamentList { grid-template-columns: 1fr; } }

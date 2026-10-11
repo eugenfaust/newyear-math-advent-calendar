@@ -1,4 +1,4 @@
-.section { --ink: var(--winter-ink); --accent: var(--winter-blue); --line: var(--winter-line); display: grid; gap: 24px; color: var(--ink); }
+.section { --ink: var(--winter-ink); --accent: var(--winter-emerald); --line: var(--winter-line); display: grid; gap: 24px; color: var(--ink); }
 .section h1, .section h2, .section h3, .section p { margin: 0; }
 .heading, .progressHeader, .pickerHeader { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; }
 .heading { padding-bottom: 22px; border-bottom: 1px solid var(--line); }
@@ -17,7 +17,7 @@
 .field textarea { resize: vertical; line-height: 1.5; }
 .hint { color: #68768b; font-size: .78rem; font-weight: 400; }
 .check { display: flex; align-items: center; gap: 10px; font-weight: 600; }
-.check input { width: 18px; height: 18px; accent-color: var(--accent); }
+.check input { width: 18px; height: 18px; accent-color: var(--winter-red); }
 .actions { flex-wrap: wrap; }
 .errorBox, .empty, .success { padding: 18px; background: #f5f8fd; border-left: 3px solid var(--accent); }
 .errorBox { color: #8d2838; border-color: #b74657; }
@@ -30,31 +30,31 @@
 .listMeta { grid-row: 2; color: #52627d; font-size: .83rem; }
 .listProgress { grid-column: 2; grid-row: 1 / 3; height: 7px; border-radius: 99px; background: #e2e9f4; overflow: hidden; }
 .listProgress span { display: block; height: 100%; background: var(--accent); }
-.arrow { grid-column: 3; grid-row: 1 / 3; color: var(--accent); font-size: 1.2rem; }
+.arrow { grid-column: 3; grid-row: 1 / 3; color: var(--winter-red); font-size: 1.2rem; }
 .pagination { align-items: center; justify-content: space-between; flex-wrap: wrap; color: #52627d; font-size: .85rem; }
 .pagination > div { align-items: center; flex-wrap: wrap; }
 .progressHeader { padding-top: 8px; }
 .progressHeader h2 { margin-top: 4px; font-size: 1.6rem; letter-spacing: -.03em; }
 .progressHeader strong { color: var(--accent); font-size: 2.4rem; font-variant-numeric: tabular-nums; line-height: 1; }
 .progressHeader strong span { color: #75839a; font-size: 1rem; }
-.readiness { display: grid; gap: 3px; padding: 15px 18px; border-left: 4px solid var(--accent); background: #edf3fc; font-size: .9rem; }
+.readiness { display: grid; gap: 3px; padding: 15px 18px; border-left: 4px solid var(--accent); background: var(--winter-emerald-soft); font-size: .9rem; }
 .readiness span { color: #44536e; line-height: 1.5; }
 .dayGrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
 .dayCard { display: flex; align-items: center; gap: 10px; min-width: 0; min-height: 92px; padding: 12px; border: 1px solid var(--line); border-radius: 8px; background: #fff; color: var(--ink); text-align: left; font: inherit; cursor: pointer; }
-.dayCard:hover, .dayCard.selected { border-color: var(--accent); background: #f1f5fc; }
+.dayCard:hover, .dayCard.selected { border-color: var(--accent); background: var(--winter-emerald-soft); }
 .dayCard.missing { border-style: dashed; background: #fafbfd; }
 .dayNumber { display: grid; flex: 0 0 43px; justify-items: center; color: var(--accent); font-size: 1.4rem; font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums; }
 .dayNumber small { font-size: .6rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; }
 .dayInfo { display: grid; gap: 5px; min-width: 0; }
 .dayInfo strong { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; font-size: .83rem; line-height: 1.3; }
 .dayInfo small { color: #637188; font-size: .69rem; }
-.dayArrow { margin-left: auto; color: var(--accent); }
+.dayArrow { margin-left: auto; color: var(--winter-red); }
 .picker { width: min(800px, calc(100vw - 32px)); max-height: min(84vh, 900px); margin: auto; padding: 24px; overflow-y: auto; border: 1px solid #b9c9e5; border-radius: 10px; background: #f7f9fe; color: var(--ink); box-shadow: 0 24px 70px rgba(24, 50, 96, .22); }
 .picker[open] { display: grid; gap: 18px; }
 .picker::backdrop { background: rgba(16, 33, 62, .55); }
 .pickerHeader { align-items: center; }
 .pickerHeader h2 { font-size: 1.55rem; }
-.textButton, .currentTask button, .taskOption button { border: 0; background: none; color: var(--accent); font: inherit; font-weight: 650; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.textButton, .currentTask button, .taskOption button { border: 0; background: none; color: var(--winter-red); font: inherit; font-weight: 650; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .currentTask { display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-block: 1px solid var(--line); font-size: .9rem; }
 .currentTask div { display: flex; gap: 12px; flex-wrap: wrap; }
 .currentTask a, .pickerHeader a { color: var(--accent); font-weight: 650; }

@@ -10,16 +10,16 @@
   position: absolute;
   top: -10px;
   border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 0 0 1px #8fb9d2, 0 0 8px 2px #fff;
+  background: radial-gradient(circle at 35% 30%, #fff 0 25%, #d4efff 65%, #a7d3ea 100%);
+  box-shadow: 0 0 0 1px #5b91b2, 0 1px 6px 2px #6da6c580;
   opacity: 0;
   animation: fall linear infinite;
 }
 
 @keyframes fall {
   0% { transform: translate3d(0, -12px, 0); opacity: 0; }
-  8% { opacity: .62; }
-  90% { opacity: .62; }
+  8% { opacity: .9; }
+  90% { opacity: .9; }
   100% { transform: translate3d(28px, 105vh, 0); opacity: 0; }
 }
 
