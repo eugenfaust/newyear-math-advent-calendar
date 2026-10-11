@@ -28,6 +28,7 @@ final class CalendarAvailability
     public function status(AdventDayProgress $progress, \DateTimeImmutable $now): string
     {
         if ($progress->getCompletedAt() !== null) return 'completed';
+        if ($progress->getCalendar()->getUser()->isTestUser()) return 'available';
         $today = $now->setTimezone($this->timezone)->format('Y-m-d');
         return $today >= $this->availableOn($progress->getCalendar()->getYear(), $progress->getDay()) ? 'available' : 'locked';
     }

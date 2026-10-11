@@ -5,6 +5,7 @@ export type ManagedUser = {
   email: string | null;
   role: "ROLE_USER" | "ROLE_ADMIN";
   isActive: boolean;
+  isTestUser: boolean;
   createdAt: string;
   updatedAt: string;
 };

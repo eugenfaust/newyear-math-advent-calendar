@@ -32,6 +32,7 @@ export function TemplateEditor({ uuid }: { uuid?: string }) {
   const [nameError, setNameError] = useState("");
   const [notice, setNotice] = useState("");
   const initializedId = useRef<string | null>(null);
+  const pickerRef = useRef<HTMLDialogElement | null>(null);
   const template = useQuery({
     queryKey: ["admin-template", uuid], enabled: Boolean(uuid),
     queryFn: async ({ signal }) => readTemplateResponse<TemplateDetail>(await fetch(`/api/admin/templates/${uuid}`, { signal })),
@@ -55,6 +56,12 @@ export function TemplateEditor({ uuid }: { uuid?: string }) {
     setYear(template.data.year === null ? "" : String(template.data.year));
     setIsActive(template.data.isActive);
   }, [template.data]);
+  useEffect(() => {
+    const picker = pickerRef.current;
+    if (!picker) return;
+    if (selectedDay !== null && !picker.open) picker.showModal();
+    if (selectedDay === null && picker.open) picker.close();
+  }, [selectedDay]);
 
   function showProblem(problem: ApiProblem, fallback: string) {
     setError(problem.message || fallback);
@@ -139,18 +146,20 @@ export function TemplateEditor({ uuid }: { uuid?: string }) {
         <label className={styles.check}><input type="checkbox" checked={isActive} onChange={(event) => setIsActive(event.target.checked)} />Активен для назначения</label>
         <div className={styles.actions}><Button label={currentId ? "Сохранить изменения" : "Создать шаблон"} type="submit" variant="primary" isLoading={busy} />{currentId && data?.isActive && <Button label="Отключить" type="button" variant="secondary" onClick={deactivate} isDisabled={busy} />}</div>
       </form>
-      {error && <p role="alert" className={styles.errorBox}>{error}</p>}{notice && <p role="status" className={styles.success}>{notice}</p>}
+      {error && selectedDay === null && <p role="alert" className={styles.errorBox}>{error}</p>}{notice && <p role="status" className={styles.success}>{notice}</p>}
       {data && <>
         <div className={styles.progressHeader}><div><span className={styles.eyebrow}>Ведомость декабря</span><h2>Задания по дням</h2></div><strong>{data.filledDays}<span> / 31</span></strong></div>
         <div className={styles.readiness} role="status"><strong>{ready ? "Готов к назначению" : "Пока не готов к назначению"}</strong><span>{!data.isActive ? "Шаблон отключён. " : ""}{missingDays.length ? `Пустые дни: ${missingDays.join(", ")}. ` : ""}{inactiveDays.length ? `Отключённые задания: дни ${inactiveDays.join(", ")}.` : ""}{ready ? "Все дни заполнены активными заданиями." : ""}</span></div>
         <div className={styles.dayGrid}>{days.map((day) => {
           const task = data.days.find((item) => item.day === day)?.task;
-          return <button key={day} type="button" className={`${styles.dayCard} ${task ? styles.filled : styles.missing} ${selectedDay === day ? styles.selected : ""}`} onClick={() => { setSelectedDay(day); setPreviewId(null); setSearch(""); setQuery(""); setTaskPage(1); }} aria-pressed={selectedDay === day}>
+          return <button key={day} type="button" className={`${styles.dayCard} ${task ? styles.filled : styles.missing} ${selectedDay === day ? styles.selected : ""}`} onClick={() => { setSelectedDay(day); setPreviewId(null); setSearch(""); setQuery(""); setTaskPage(1); setError(""); }} aria-pressed={selectedDay === day}>
             <span className={styles.dayNumber}>{String(day).padStart(2, "0")}<small>дек</small></span><span className={styles.dayInfo}><strong>{task?.title ?? "Выбрать задание"}</strong><small>{task ? task.isActive ? "Задание выбрано" : "Задание отключено" : "День пуст"}</small></span><span className={styles.dayArrow} aria-hidden>↗</span>
           </button>;
         })}</div>
-        {selectedDay !== null && <section className={styles.picker} aria-label={`Задание для ${selectedDay} декабря`}>
+        <dialog ref={pickerRef} className={styles.picker} aria-label={selectedDay === null ? "Выбор задания" : `Задание для ${selectedDay} декабря`} onClose={() => { setSelectedDay(null); setPreviewId(null); }}>
+          {selectedDay !== null && <>
           <div className={styles.pickerHeader}><div><span className={styles.eyebrow}>День {String(selectedDay).padStart(2, "0")}</span><h2>Выбрать задание</h2></div><button type="button" className={styles.textButton} onClick={() => { setSelectedDay(null); setPreviewId(null); }}>Закрыть</button></div>
+          {error && <p role="alert" className={styles.errorBox}>{error}</p>}
           {selected?.task && <div className={styles.currentTask}><span>Сейчас: <strong>{selected.task.title}</strong>{!selected.task.isActive && " · отключено"}</span><div><Link href={`/admin/tasks/${selected.task.uuid}`} target="_blank" rel="noopener noreferrer">Посмотреть задание ↗</Link><button type="button" onClick={() => setDayTask(selectedDay, null)} disabled={busy}>Очистить день</button></div></div>}
           <form className={styles.filters} onSubmit={(event) => { event.preventDefault(); setTaskPage(1); setQuery(search.trim()); }}><TextInput label="Поиск задания" value={search} onChange={setSearch} width="100%" /><Button label="Найти" type="submit" variant="secondary" /></form>
           {tasks.isPending ? <p role="status">Загрузка заданий…</p> : tasks.isError ? <div role="alert" className={styles.errorBox}>Не удалось загрузить задания. <button type="button" onClick={() => tasks.refetch()}>Повторить</button></div> : tasks.data?.items.length ? <>
@@ -158,7 +167,8 @@ export function TemplateEditor({ uuid }: { uuid?: string }) {
             <div className={styles.pagination}><span>Найдено {tasks.data.pagination.total}</span><div><Button label="Назад" type="button" variant="secondary" isDisabled={taskPage <= 1} onClick={() => setTaskPage(taskPage - 1)} /><span>Страница {taskPage} из {tasks.data.pagination.totalPages}</span><Button label="Далее" type="button" variant="secondary" isDisabled={taskPage >= tasks.data.pagination.totalPages} onClick={() => setTaskPage(taskPage + 1)} /></div></div>
           </> : <p className={styles.empty}>Активных заданий с таким названием нет. <Link href="/admin/tasks/create">Создать задание</Link></p>}
           {previewId && <div className={styles.preview}><div className={styles.pickerHeader}><h3>Предпросмотр задания</h3><Link href={`/admin/tasks/${previewId}`} target="_blank" rel="noopener noreferrer">Открыть редактор ↗</Link></div>{preview.isPending ? <p role="status">Загрузка предпросмотра…</p> : preview.isError ? <div role="alert">Не удалось открыть задание. <button type="button" onClick={() => preview.refetch()}>Повторить</button></div> : preview.data && <TaskContent title={preview.data.title} content={preview.data.content} imageUrl={preview.data.imageUrl} />}</div>}
-        </section>}
+          </>}
+        </dialog>
       </>}
     </>}
   </section>;

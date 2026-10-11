@@ -18,10 +18,11 @@ const schema = z.object({
   email: z.string().trim().refine((value) => !value || (value.length <= 180 && z.email().safeParse(value).success), "Введите корректный email"),
   role: z.enum(["ROLE_USER", "ROLE_ADMIN"]),
   isActive: z.boolean(),
+  isTestUser: z.boolean(),
   password: z.string(),
 });
 type Values = z.infer<typeof schema>;
-const defaults: Values = { name: "", login: "", email: "", role: "ROLE_USER", isActive: true, password: "" };
+const defaults: Values = { name: "", login: "", email: "", role: "ROLE_USER", isActive: true, isTestUser: false, password: "" };
 
 export function UserEditor({ uuid }: { uuid: string }) {
   const creating = uuid === "new";
@@ -38,7 +39,7 @@ export function UserEditor({ uuid }: { uuid: string }) {
     const abort = new AbortController();
     fetch(`/api/admin/users/${uuid}`, { signal: abort.signal })
       .then(readResponse<ManagedUser>)
-      .then((user) => reset({ name: user.name, login: user.login, email: user.email ?? "", role: user.role, isActive: user.isActive, password: "" }))
+      .then((user) => reset({ name: user.name, login: user.login, email: user.email ?? "", role: user.role, isActive: user.isActive, isTestUser: user.isTestUser, password: "" }))
       .catch((problem) => { if (!abort.signal.aborted) setLoadError(problem?.message ?? "Не удалось загрузить пользователя"); })
       .finally(() => { if (!abort.signal.aborted) setLoading(false); });
     return () => abort.abort();
@@ -58,7 +59,7 @@ export function UserEditor({ uuid }: { uuid: string }) {
     setNotice("");
     if (creating && Array.from(values.password).length < 6) { setError("password", { message: "Минимум 6 символов" }); return; }
     if (values.password && Array.from(values.password).length < 6) { setError("password", { message: "Минимум 6 символов" }); return; }
-    const payload: Record<string, unknown> = { name: values.name.trim(), login: values.login.trim(), email: values.email.trim() || null, role: values.role, isActive: values.isActive };
+    const payload: Record<string, unknown> = { name: values.name.trim(), login: values.login.trim(), email: values.email.trim() || null, role: values.role, isActive: values.isActive, isTestUser: values.isTestUser };
     if (values.password) payload.password = values.password;
     try {
       const response = await fetch(creating ? "/api/admin/users" : `/api/admin/users/${uuid}`, { method: creating ? "POST" : "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
@@ -91,6 +92,7 @@ export function UserEditor({ uuid }: { uuid: string }) {
       <Controller name="email" control={control} render={({ field, fieldState }) => <TextInput label="Email" type="email" value={field.value} onChange={field.onChange} onBlur={field.onBlur} htmlName={field.name} ref={field.ref} autoComplete="email" status={fieldState.error ? { type: "error", message: fieldState.error.message } : undefined} width="100%" />} />
       <label className={styles.field}>Роль<Controller name="role" control={control} render={({ field }) => <select {...field}><option value="ROLE_USER">Пользователь</option><option value="ROLE_ADMIN">Администратор</option></select>} /></label>
       <label className={styles.check}><Controller name="isActive" control={control} render={({ field }) => <input type="checkbox" name={field.name} checked={field.value} onChange={(event) => field.onChange(event.target.checked)} ref={field.ref} />} />Активен</label>
+      <div><label className={styles.check}><Controller name="isTestUser" control={control} render={({ field }) => <input type="checkbox" name={field.name} checked={field.value} onChange={(event) => field.onChange(event.target.checked)} ref={field.ref} />} />Тестовый пользователь</label><p className={styles.hint}>Все 31 задания назначенного календаря доступны без ожидания даты открытия.</p></div>
       <Controller name="password" control={control} render={({ field, fieldState }) => <TextInput label={creating ? "Пароль (минимум 6 символов)" : "Новый пароль (оставьте пустым, чтобы не менять)"} type="password" value={field.value} onChange={field.onChange} onBlur={field.onBlur} htmlName={field.name} ref={field.ref} autoComplete="new-password" isRequired={creating} status={fieldState.error ? { type: "error", message: fieldState.error.message } : undefined} width="100%" />} />
       {errors.root && <p role="alert" className={styles.error}>{errors.root.message}</p>}
       {notice && <p role="status" className={styles.success}>{notice}</p>}

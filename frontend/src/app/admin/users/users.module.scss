@@ -15,6 +15,7 @@
 .field select { width: 100%; min-height: 42px; padding: 8px 12px; border: 1px solid #aaa; border-radius: 6px; background: #fff; font: inherit; }
 .check { display: flex; align-items: center; gap: 8px; }
 .check input { width: 18px; height: 18px; }
+.hint { margin: 6px 0 0 26px !important; color: #586781; font-size: .85rem; }
 .error { color: #b42318; }
 .success { color: #067647; }
 .calendarPanel { display: grid; gap: 18px; padding: 24px; border: 1px solid #d4dcf1; border-radius: 14px; background: #f7f9ff; max-width: 760px; }

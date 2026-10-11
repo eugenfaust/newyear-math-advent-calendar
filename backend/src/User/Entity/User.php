@@ -46,6 +46,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(name: 'is_active')]
     private bool $isActive = true;
 
+    #[ORM\Column(name: 'is_test_user', options: ['default' => false])]
+    private bool $isTestUser = false;
+
     #[ORM\Column(name: 'created_at', type: 'datetimetz_immutable')]
     private \DateTimeImmutable $createdAt;
 
@@ -73,6 +76,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getPassword(): ?string { return $this->passwordHash; }
     public function getRoles(): array { return array_values(array_unique([...$this->roles, 'ROLE_USER'])); }
     public function isActive(): bool { return $this->isActive; }
+    public function isTestUser(): bool { return $this->isTestUser; }
     public function getCreatedAt(): \DateTimeImmutable { return $this->createdAt; }
     public function getUpdatedAt(): \DateTimeImmutable { return $this->updatedAt; }
     public function eraseCredentials(): void {}
@@ -97,6 +101,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->touch();
     }
     public function setActive(bool $active): void { $this->isActive = $active; $this->touch(); }
+    public function setTestUser(bool $testUser): void { $this->isTestUser = $testUser; $this->touch(); }
     private function touch(): void { $this->updatedAt = new \DateTimeImmutable('now', new \DateTimeZone('UTC')); }
 
     public function toPublicArray(): array

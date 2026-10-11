@@ -15,6 +15,8 @@
 
 `GET /api/v1/calendar` выбирает календарь текущего года **по `APP_TIMEZONE=Europe/Moscow` на сервере**. Для MVP действует `UNIQUE(user_id, year)`. Если календарь на этот год не назначен, ответ `404 ADVENT_CALENDAR_NOT_FOUND`, без автоматического выбора прошлогоднего. `GET /api/v1/calendar?year=YYYY` выбирает конкретный год и позволяет посмотреть историю; проверка владельца обязательна. Доступность дня рассчитывается сервером в той же бизнес-зоне; изменение часов браузера ничего не открывает. После 31 декабря незавершённые дни назначенного календаря остаются доступны.
 
+Если администратор установил пользователю `isTestUser=true`, backend считает все 31 дня любого назначенного этому пользователю календаря доступными независимо от даты. Это действует для списка, чтения задания, завершения и административного просмотра прогресса. Завершённый день остаётся `completed`. Снятие флага сразу возвращает обычное правило даты для незавершённых дней; уже выполненные дни и награды сохраняются. Флаг не создаёт календарь и не даёт доступа к чужому календарю.
+
 `GET /api/v1/calendar` возвращает `{uuid, year, startedAt, completedDays, availableDays, totalDays: 31, days}`. `days` содержит 31 запись по возрастанию номера: `{day, status, availableOn, openedAt, completedAt}`. Статусы: `locked`, `available`, `completed`; `availableOn` — дата открытия в бизнес-зоне (`YYYY-MM-DD`). `availableDays` считает все открытые по дате дни, включая завершённые; `completedDays` — завершённые. Временные поля — UTC либо `null`. Список не содержит текстов заданий.
 
 `GET /api/v1/calendar/days/{day}` принимает `day` от 1 до 31 и необязательный `?year=YYYY` по тому же правилу. Доступный день возвращает `{day, year, status, availableOn, openedAt, completedAt, task}`, где `task` — пользовательский DTO `{uuid, title, content, imageUrl, answerType}` без `correctAnswer` и `solution`. Первое успешное чтение ставит `openedAt` и `startedAt` один раз. Закрытый день возвращает `403 ADVENT_DAY_LOCKED` без задания; некорректный день или год — `422 VALIDATION_ERROR`. Все ответы имеют `Cache-Control: no-store`. Frontend читает через same-origin `/api/calendar` и `/api/calendar/days/{day}`; bearer token остаётся на сервере Next.js.
@@ -47,11 +49,11 @@ Frontend использует same-origin `GET /api/tree` и `POST /api/tree/orn
 
 - `GET /api/v1/admin/users?page=1&perPage=20&search=...` ищет по имени, логину и email, возвращает стандартный список с пагинацией. Сортировка: дата создания по убыванию, UUID по возрастанию.
 - `GET /api/v1/admin/users/{uuid}` возвращает профиль без пароля.
-- `POST /api/v1/admin/users` принимает `{login, name, email?, role, isActive?, password}` и возвращает созданный профиль с HTTP 201.
+- `POST /api/v1/admin/users` принимает `{login, name, email?, role, isActive?, isTestUser?, password}` и возвращает созданный профиль с HTTP 201.
 - `PATCH /api/v1/admin/users/{uuid}` принимает любое непустое подмножество этих полей; пароль меняется только при передаче нового значения. Возвращает профиль с HTTP 200.
 - `DELETE /api/v1/admin/users/{uuid}` деактивирует пользователя и возвращает HTTP 204. Запись и история сохраняются.
 
-`role` — `ROLE_USER` или `ROLE_ADMIN`, `isActive` — boolean. Логин содержит 1–100 латинских букв, цифр, `_`, `.` или `-` и уникален среди всех пользователей, включая отключённых. Имя — 1–150 символов, пароль — 6–1024 символа. `email` может быть `null`. Ошибки полей — `422 VALIDATION_ERROR` с `details`; занятый логин — `409 LOGIN_TAKEN`; отсутствующий пользователь — `404 USER_NOT_FOUND`.
+`role` — `ROLE_USER` или `ROLE_ADMIN`; `isActive` и `isTestUser` — boolean. `isTestUser` по умолчанию `false`; поле есть в административных DTO списка и профиля и изменяется только через admin API. Логин содержит 1–100 латинских букв, цифр, `_`, `.` или `-` и уникален среди всех пользователей, включая отключённых. Имя — 1–150 символов, пароль — 6–1024 символа. `email` может быть `null`. Ошибки полей — `422 VALIDATION_ERROR` с `details`; занятый логин — `409 LOGIN_TAKEN`; отсутствующий пользователь — `404 USER_NOT_FOUND`.
 
 ## Библиотека заданий
 

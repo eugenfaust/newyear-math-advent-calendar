@@ -67,6 +67,7 @@ final class AdminUsersController
         $user->setEmail($this->email($data['email'] ?? null));
         $user->setRoles([$data['role']]);
         $user->setActive($data['isActive'] ?? true);
+        $user->setTestUser($data['isTestUser'] ?? false);
         $user->setPasswordHash($this->hasher->hashPassword($user, $data['password']));
         $errors = $this->entityErrors($user);
         if ($errors) return $this->validation($errors);
@@ -96,6 +97,7 @@ final class AdminUsersController
         if (array_key_exists('email', $data)) $user->setEmail($this->email($data['email']));
         if (array_key_exists('role', $data)) $user->setRoles([$data['role']]);
         if (array_key_exists('isActive', $data)) $user->setActive($data['isActive']);
+        if (array_key_exists('isTestUser', $data)) $user->setTestUser($data['isTestUser']);
         if (array_key_exists('password', $data)) $user->setPasswordHash($this->hasher->hashPassword($user, $data['password']));
         $errors = $this->entityErrors($user);
         if ($errors) return $this->validation($errors);
@@ -134,7 +136,7 @@ final class AdminUsersController
     {
         $errors = [];
         foreach ($data as $key => $value) {
-            if (!in_array($key, ['login', 'name', 'email', 'role', 'isActive', 'password'], true)) {
+            if (!in_array($key, ['login', 'name', 'email', 'role', 'isActive', 'isTestUser', 'password'], true)) {
                 $errors[] = ['field' => $key, 'message' => 'Unknown field.'];
             }
         }
@@ -146,6 +148,7 @@ final class AdminUsersController
         if (array_key_exists('email', $data) && $data['email'] !== null && (!is_string($data['email']) || ($data['email'] !== '' && (strlen($data['email']) > 180 || !filter_var($data['email'], FILTER_VALIDATE_EMAIL))))) $errors[] = ['field' => 'email', 'message' => 'Enter a valid email address.'];
         if (array_key_exists('role', $data) && !in_array($data['role'], ['ROLE_USER', 'ROLE_ADMIN'], true)) $errors[] = ['field' => 'role', 'message' => 'Invalid role.'];
         if (array_key_exists('isActive', $data) && !is_bool($data['isActive'])) $errors[] = ['field' => 'isActive', 'message' => 'Expected a boolean.'];
+        if (array_key_exists('isTestUser', $data) && !is_bool($data['isTestUser'])) $errors[] = ['field' => 'isTestUser', 'message' => 'Expected a boolean.'];
         if (array_key_exists('password', $data) && (!is_string($data['password']) || mb_strlen($data['password']) < 6 || mb_strlen($data['password']) > 1024)) $errors[] = ['field' => 'password', 'message' => 'Password must be 6–1024 characters.'];
         return $errors;
     }
@@ -181,7 +184,7 @@ final class AdminUsersController
         return [
             'uuid' => $user->getUuid(), 'login' => $user->getLogin(), 'name' => $user->getName(),
             'email' => $user->getEmail(), 'role' => in_array('ROLE_ADMIN', $user->getRoles(), true) ? 'ROLE_ADMIN' : 'ROLE_USER',
-            'isActive' => $user->isActive(),
+            'isActive' => $user->isActive(), 'isTestUser' => $user->isTestUser(),
             'createdAt' => $user->getCreatedAt()->format('Y-m-d\TH:i:s\Z'),
             'updatedAt' => $user->getUpdatedAt()->format('Y-m-d\TH:i:s\Z'),
         ];
